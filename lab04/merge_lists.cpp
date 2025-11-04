@@ -6,44 +6,98 @@
 
 namespace lab04
 {
-
 	NodeT* create_node(int value) 
 	{
-		// TODO: Function to create a node with a specified value, with next pointing to NULL.
-		return NULL;
+		auto node = new NodeT;
+		node->value = value;
+		node->next = nullptr;
+		return node;
 	}
 
 	ListT* create_list(int* values, int n) 
 	{
-		// TODO: Function to create a list with values specified from the input array. If the array is empty or NULL, create an empty list.
-		return NULL;
+		const auto list = new ListT;
+		list->first = nullptr;
+		list->last = nullptr;
+
+		if (n == 0) {
+			return list; // return empty list
+		}
+
+
+		list->first = create_node(values[0]);
+		list->last = list->first;
+
+		for (int i = 1; i < n; i++) {
+			const auto tmp = create_node(values[i]);
+			tmp->next = list->first;
+			list->first = tmp;
+		}
+
+		return list;
 	}
 
 	NodeT* remove_first(ListT* list) 
 	{
-		// TODO: Function to remove the first node from the list. Return the removed node. If the list is empty or NULL return NULL. 
-		//       DO NOT forget to set the ->next of the removed node to NULL.
-		return NULL;
+		if (!list) {
+			return nullptr;
+		}
+
+		const auto second = list->first->next;
+		delete list->first;
+		list->first = second;
+
+		if (list->first == nullptr) {
+			list->last = nullptr;
+		}
+
+		return list->first;
 	}
 
 	void insert_last(ListT* list, NodeT* node) {
-		// TODO: Function to insert a node as the tail of the list.
+		if (!list || !list->first) return;
+		list->last->next = node;
+		list->last = node;
 	}
 
 	void print_list(ListT* list)
 	{
-		// TODO: Function to print the contents of the lists. A suggestive message should be printed if the list is empty or NULL.
+		if (!list) {
+			printf("The list is empty!\n");
+			return;
+		}
+
+		NodeT* tmp = list->first;
+		while (tmp) {
+			printf("%d ", tmp->value);
+			tmp = tmp->next;
+		}
 	}
 
-	bool is_empty(ListT* list)
+	bool is_empty(const ListT * const list)
 	{
-		// TODO: Return true if the list is empty. Return false otherwise.
+		if (list && list->first) {
+			return false;
+		}
 		return true;
 	}
 
 	void destroy_list(ListT** list)
 	{
-		// TODO: Free the memory of each node and finally the memory allocated for the list.
+		if (!list || !(*list)) {
+			return;
+		}
+
+		ListT* rlist = *list;
+		NodeT* current = rlist->first;
+		while (current) {
+			NodeT* next = current->next;
+			delete current;
+			current = next;
+		}
+
+		*list = nullptr;
+		delete rlist;
 	}
 
 
@@ -51,13 +105,13 @@ namespace lab04
 	ListT** generate_k_sorted_lists(int n, int k)
 	{
 		// TODO: Generate k sorted lists of equal size that have the sum of elements equal to n. The lists should be stored in an array.
-		return NULL;
+		return nullptr;
 	}
 
 	ListT* merge_2_lists(ListT* list_A, ListT* list_B)
 	{
 		// TODO: Merge two sorted lists.
-		return NULL;
+		return nullptr;
 	}
 
 	void min_heapify(ListT* lists[], int size, int i, Operation *op)
@@ -67,13 +121,13 @@ namespace lab04
 
 	void build_heap_buttomup(ListT* lists[], int size, Operation* op)
 	{
-		// TODO: Build the heap of lists in a buttom-up manner using min-heapify.
+		// TODO: Build the heap of lists in a bottom-up manner using min-heapify.
 	}
 
 	ListT* merge_k_lists(ListT* lists[], int size, Operation* op)
 	{
 		// TODO: Merge the k sorted lists.
-		return NULL;
+		return nullptr;
 	}
 
     void demonstrate(int n, int k)

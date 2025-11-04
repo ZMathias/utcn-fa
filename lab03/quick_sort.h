@@ -17,6 +17,8 @@ namespace lab03
 	 */
 	void quickSort(int* values, int n, Operation* opAsg = nullptr, Operation* opCmp = nullptr);
 
+	void insertionSort(int* values, int n, Operation* opAsg = nullptr, Operation* opCmp = nullptr);
+
 	/**
 	 * @brief Hybridized Quick sort algorithm
 	 *
@@ -25,17 +27,18 @@ namespace lab03
 	 * @param opAsg optional counter for assignment operations
 	 * @param opCmp optional counter for comparison operations
 	 */
-	void hybridizedQuickSort(int* values, int n, Operation* opAsg = nullptr, Operation* opCmp = nullptr);
+	void hybridizedQuickSort(int* values, int n, Operation* opAsg = nullptr, Operation* opCmp = nullptr, int threshold = 29);
 
 	/**
 	 * @brief Quick select algorithm
 	 *
 	 * @param values array of input values to be sorted
 	 * @param n number of values in the input array
+	 * @param k
 	 * @param opAsg optional counter for assignment operations
 	 * @param opCmp optional counter for comparison operations
 	 */
-		void quickSelect(int* values, int n, Operation* opAsg = nullptr, Operation* opCmp = nullptr);
+	int quickSelect(int* values, int n, int k, Operation* opAsg = nullptr, Operation* opCmp = nullptr);
 
 	/**
 	 * @brief Heap sort algorithm
