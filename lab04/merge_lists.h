@@ -33,9 +33,10 @@ namespace lab04
 	 *
 	 * @param values array of input values to be stored in a list
 	 * @param n number of values in the input array
+	 * @param op
 	 * @return the created list
 	 */
-	ListT* create_list(int* values = nullptr, int n = 0);
+	ListT* create_list(const int* values = nullptr, int n = 0, Operation* op = nullptr);
 
 	/**
 	 * @brief Function to remove the first node from the list. Return the removed node. If the list is empty or NULL return NULL.
@@ -51,22 +52,25 @@ namespace lab04
 	 *
 	 * @param list the list where we want to insert a new head.
 	 * @param node the node to be inserted
+	 * @param op
 	 */
-	void insert_last(ListT* list, NodeT* node);
-
-	/**
-	 * @brief Function to print the contents of the lists. A suggestive message should be printed if the list is empty or NULL.
-	 *
-	 * @param list the list that should be printed
-	 */
-	void print_list(ListT* list);
+	void insert_last(ListT* list, const NodeT* node, Operation* op = nullptr);
+	void insert_last(ListT* list, const int value, Operation* op = nullptr);
 
 	/**
 	 * @brief Returns true if the list is empty (or NULL).
 	 *
 	 * @param list the list of elements.
 	 */
-	bool is_empty(ListT* list);
+	bool is_empty(const ListT* list);
+
+	/**
+	 * @brief Function to print the contents of the lists. A suggestive message should be printed if the list is empty or NULL.
+	 *
+	 * @param list the list that should be printed
+	 */
+	void print_list(const ListT* list);
+
 
 	/**
 	 * @brief Free the memory of each node and finally the memory allocated for the list.
@@ -83,10 +87,12 @@ namespace lab04
 	 *
 	 * @param n the total number of elements of the k lists
 	 * @param k the number of lists
+	 * @param range_min
+	 * @param range_max
 	 * 
 	 * @return the array of lists
 	 */
-	ListT** generate_k_sorted_lists(int n, int k);
+	ListT** generate_k_sorted_lists(int n, int k, int range_min = 10, int range_max = 50000);
 
 	/**
 	 * @brief The algorithm of merging two sorted lists.
@@ -95,7 +101,7 @@ namespace lab04
 	 * @param list_B the second list
 	 * @return the resulting ascendingly sorted list.
 	 */
-	ListT* merge_2_lists(ListT* list_A, ListT* list_B);
+	ListT* merge_2_lists(const ListT* list_A, const ListT* list_B);
 
 	/**
 	 * @brief MIN-Heapify function that works on lists heads.
@@ -114,7 +120,7 @@ namespace lab04
 	 * @param size number of lists in the array
 	 * @param op optional counter for operations 
 	 */
-	void build_heap_buttomup(ListT* lists[], int size, Operation *op = nullptr);
+	void build_heap_bottom_up(ListT* lists[], int size, Operation *op = nullptr);
 
 	/**
 	 * @brief The algorithm of merging the k sorted lists.
