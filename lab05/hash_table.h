@@ -12,7 +12,16 @@ namespace lab05
         char name[30];
     };
 
-    constexpr int PRIME_DIVIDER = 10007;
+    struct Record
+    {
+        float alpha;
+        float avg_effort_f;
+        int max_effort_f;
+        float avg_effort_nf;
+        int max_effort_nf;
+    };
+
+    constexpr int HASHMAP_SIZE = 10007;
     #define TOMBSTONE (reinterpret_cast<Entry*>(0xDEADBEEF))
 
     struct HashMapT
@@ -20,6 +29,11 @@ namespace lab05
         Entry** arr;
         int size;
     };
+
+    /**
+     * Copies the value of an entry
+     */
+    Entry* copy_entry(Entry* val);
 
     /**
      *
@@ -36,9 +50,16 @@ namespace lab05
      */
     int hash(int key, int idx = 0);
 
-    Entry** search(HashMapT* h_map, int key);
+    Entry** search(HashMapT* h_map, int key, int* effort = nullptr);
+
+    Entry* generate_mock_data(const int size);
 
     bool insert(HashMapT* h_map, Entry* value);
+
+    std::vector<int> fill_hashmap(HashMapT* h_map, float desired_fill);
+
+    void print_hashmap(HashMapT* h_map);
+    void print_global_hashmap();
 
     /**
      * @brief Demo code for the sorting algorithms
@@ -54,6 +75,11 @@ namespace lab05
      * @param whichCase one of AVERAGE, BEST or WORST cases
      */
     void performance(Profiler& profiler, AnalysisCase whichCase);
+
+    void init_global_hashmap(int size);
+    void search_global_hashmap(int id);
+    void delete_from_global_hashmap(int id);
+    void delete_global_hashmap();
 }
 
 #endif //LAB05_HASH_TABLE_H
