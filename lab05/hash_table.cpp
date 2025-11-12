@@ -16,6 +16,19 @@ namespace lab05
         return distrib(gen);
     }
 
+    int random_id(const HashMapT *h_map) {
+        if (h_map == nullptr || h_map->inserted == 0) return -1; // raise SIGSEGV
+
+        for (int i = 0; i < HASHMAP_SIZE; i++) {
+            const int index = random_number(0, HASHMAP_SIZE - 1);
+            if (h_map->arr[index] != nullptr && h_map->arr[index] != TOMBSTONE) {
+                return h_map->arr[index]->id;
+            }
+        }
+
+        return -1; // timeout
+    }
+
     HashMapT* create_hashmap() {
         // NOLINTNEXTLINE
         auto* h_map = new HashMapT;
@@ -63,7 +76,7 @@ namespace lab05
     Entry** search(const HashMapT* h_map, const int key, int* effort) {
         Entry** arr = h_map->arr;
 
-        for (int i = 0; i < h_map->size; i++) {
+        for (int i = 0; i < HASHMAP_SIZE; i++) {
             const int h = hash(key, i);
             if (effort) (*effort)++;
             if (arr[h] == nullptr) {
@@ -90,7 +103,7 @@ namespace lab05
         // we must first find the empty slot into which we insert
         Entry** arr = h_map->arr;
         int first_tombstone = -1;
-        for (int i = 0; i < h_map->size; i++) {
+        for (int i = 0; i < HASHMAP_SIZE; i++) {
             const int h = hash(value->id, i);
 
             if (arr[h] == nullptr) {
@@ -129,7 +142,7 @@ namespace lab05
         return false; // no slot found
     }
 
-    bool delete_entry(const HashMapT* h_map, const int key) {
+    bool delete_entry(HashMapT *h_map, const int key) {
         Entry** index = search(h_map, key);
         if (index == nullptr) {
             return false; // not in table
@@ -137,7 +150,7 @@ namespace lab05
 
         delete *index; // delete structure pointed to by index
         *index = TOMBSTONE;
-
+        h_map->inserted--;
         return true;
     }
 
@@ -158,7 +171,7 @@ namespace lab05
 
         for (int i = 0; i < size; i++) {
             entries[i].id = keys[i];
-            strcpy(entries[i].name, names[random_number(0, names_count - 1) % names_count].c_str());
+            strcpy(entries[i].name, names[random_number(0, names_count - 1)].c_str());
         }
 
 
@@ -203,12 +216,22 @@ namespace lab05
         return unique_unused;
     }
 
-    void decrease_fill(const HashMapT *h_map, const float desired_fill) {
+    void decrease_fill(HashMapT *h_map, const float desired_fill) {
+        if (h_map == nullptr) {
+            return;
+        }
 
+        const int desired_elems = HASHMAP_SIZE * desired_fill;
+        while (h_map->inserted > desired_elems) {
+            delete_entry(h_map, random_id(h_map));
+        }
+
+        const float new_fill = static_cast<float>(h_map->inserted) / static_cast<float>(HASHMAP_SIZE);
+        printf("\nFill factor after deletion: %.2f\n", new_fill);
     }
 
     void print_hashmap(const HashMapT* h_map) {
-        for (int i = 0; i < h_map->size; i++) {
+        for (int i = 0; i < HASHMAP_SIZE; i++) {
             if (h_map->arr[i] != nullptr && h_map->arr[i] != TOMBSTONE) {
                 printf("id: %d; name: %s\n", h_map->arr[i]->id, h_map->arr[i]->name);
             }
@@ -307,7 +330,7 @@ namespace lab05
                 int max_effort_f = -1; // effort will never be negative
 
                 while (count < 1500) {
-                    const int index = random_number(0, h_map->size - 1);
+                    const int index = random_number(0, HASHMAP_SIZE - 1);
                     if (h_map->arr[index] != nullptr && h_map->arr[index] != TOMBSTONE) {
                         int effort = 0;
 
@@ -354,17 +377,67 @@ namespace lab05
 
         printf("\nFill factor | AVG Effort | Max Effort | AVG Effort NF | Max Effort NF\n");
         for (const auto record : statistics) {
-            printf("alpha: %.2f |   %.4f   |     %.4f     |     %.4f     | %.4f\n", record.alpha, record.avg_effort_f, record.max_effort_f_avg, record.avg_effort_nf, record.max_effort_nf_avg);
+            printf("0.0 -> %.2f |   %.4f   |   %.4f  |    %.4f     | %.4f\n", record.alpha, record.avg_effort_f, record.max_effort_f_avg, record.avg_effort_nf, record.max_effort_nf_avg);
         }
 
-        // TEST AFTER DELETIONS
-        //
-        HashMapT* h_map = create_hashmap();
-        fill_hashmap(h_map, 0.99f);
+        // put in block to scope variables like previous tests
+        {
+            // TEST AFTER DELETIONS
+            // First fill to 0.99f then decrease fill by deletion to 0.8f
+            HashMapT* h_map = create_hashmap();
+            const auto unused = fill_hashmap(h_map, 0.99f);
+            decrease_fill(h_map, 0.8f);
 
+            // now we test 1500 searches for found and 1500 for not found
+            int total_effort_f = 0;
+            int total_max_effort_f = 0;
 
+            int total_effort_nf = 0;
+            int total_max_effort_nf = 0;
+            for (int it = 0; it < 5; it++) {
 
-        delete_hashmap(&h_map);
+                int max_effort = 0;
+
+                for (int i = 0; i < 1500; i++) {
+                    const int id = random_id(h_map);
+                    int effort = 0;
+
+                    search(h_map, id, &effort);
+
+                    total_effort_f += effort;
+                    if (effort > max_effort) {
+                        max_effort = effort;
+                    }
+                }
+
+                total_max_effort_f += max_effort;
+
+                // unused id tests
+                max_effort = 0;
+                for (const auto id : unused) {
+                    int effort = 0;
+
+                    search(h_map, id, &effort);
+
+                    total_effort_nf += effort;
+                    if (effort > max_effort) {
+                        max_effort = effort;
+                    }
+                }
+
+                total_max_effort_nf += max_effort;
+            }
+
+            const float avg_effort_f = static_cast<float>(total_effort_f) / 7500.f;
+            const float avg_max_effort_f = static_cast<float>(total_max_effort_f) / 5.f;
+
+            const float avg_effort_nf = static_cast<float>(total_effort_nf) / 7500.f;
+            const float avg_max_effort_nf = static_cast<float>(total_max_effort_nf) / 5.f;
+
+            printf("\n===PERFORMANCE AFTER DELETION===\nFill factor | AVG Effort | Max Effort | AVG Effort NF | Max Effort NF\n0.99 -> 0.8 |   %.4f   |  %.4f  |    %.4f    | %.4f\n", avg_effort_f, avg_max_effort_f, avg_effort_nf, avg_max_effort_nf);
+
+            delete_hashmap(&h_map);
+        }
         // NOLINTNEXTLINE
     }
 }
