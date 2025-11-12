@@ -16,9 +16,9 @@ namespace lab05
     {
         float alpha;
         float avg_effort_f;
-        int max_effort_f;
+        float max_effort_f_avg;
         float avg_effort_nf;
-        int max_effort_nf;
+        float max_effort_nf_avg;
     };
 
     constexpr int HASHMAP_SIZE = 10007;
@@ -33,7 +33,7 @@ namespace lab05
     /**
      * Copies the value of an entry
      */
-    Entry* copy_entry(Entry* val);
+    Entry* copy_entry(const Entry* val);
 
     /**
      *
@@ -50,15 +50,15 @@ namespace lab05
      */
     int hash(int key, int idx = 0);
 
-    Entry** search(HashMapT* h_map, int key, int* effort = nullptr);
+    Entry** search(const HashMapT* h_map, int key, int* effort = nullptr);
 
     Entry* generate_mock_data(const int size);
 
-    bool insert(HashMapT* h_map, Entry* value);
+    bool insert(const HashMapT* h_map, Entry* value);
 
-    std::vector<int> fill_hashmap(HashMapT* h_map, float desired_fill);
+    std::vector<int> fill_hashmap(const HashMapT* h_map, float desired_fill);
 
-    void print_hashmap(HashMapT* h_map);
+    void print_hashmap(const HashMapT* h_map);
     void print_global_hashmap();
 
     /**

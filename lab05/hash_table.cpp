@@ -1,12 +1,23 @@
 #include "hash_table.h"
+
+#include <climits>
+
 #include "catch2.hpp"
 #include <iostream>
+#include <random>
 
 namespace lab05
 {
     HashMapT* global_hmap;
 
+    int random_number(int lo, int hi) {
+        static std::mt19937 gen(std::random_device{}());
+        std::uniform_int_distribution<int> distrib(lo, hi);
+        return distrib(gen);
+    }
+
     HashMapT* create_hashmap() {
+        // NOLINTNEXTLINE
         auto* h_map = new HashMapT;
         h_map->arr = new Entry*[HASHMAP_SIZE]; // memory management is deferred to the user
         h_map->size = HASHMAP_SIZE;
@@ -15,7 +26,8 @@ namespace lab05
         return h_map;
     }
 
-    Entry* copy_entry(Entry* val) {
+    Entry* copy_entry(const Entry* val) {
+        // NOLINTNEXTLINE
         Entry* copy = new Entry;
 
         copy->id = val->id;
@@ -25,12 +37,17 @@ namespace lab05
     }
 
     void delete_hashmap(HashMapT** h_map) {
+        if (*h_map == nullptr) return;
+
         for (int i = 0; i < (*h_map)->size; i++) {
-            delete (*h_map)->arr[i]; // delete each entry
+            if ((*h_map)->arr[i] != nullptr && (*h_map)->arr[i] != TOMBSTONE) {
+                delete (*h_map)->arr[i]; // delete each entry
+            }
         }
 
         delete[] (*h_map)->arr;
-        delete *h_map; // delete the array itself
+
+        delete *h_map; // delete the hashmap structure
         (*h_map) = nullptr;
     }
 
@@ -40,7 +57,7 @@ namespace lab05
         return (key + c1*idx + c2*idx*idx) % HASHMAP_SIZE;
     }
 
-    Entry** search(HashMapT* h_map, const int key, int* effort) {
+    Entry** search(const HashMapT* h_map, const int key, int* effort) {
         Entry** arr = h_map->arr;
 
         for (int i = 0; i < h_map->size; i++) {
@@ -62,7 +79,7 @@ namespace lab05
         return nullptr; // none found, nullptr signifies miss
     }
 
-    bool insert(HashMapT* h_map, Entry* value) {
+    bool insert(const HashMapT* h_map, Entry* value) {
         if (value == nullptr) {
             return false;
         }
@@ -106,7 +123,7 @@ namespace lab05
         return false; // no slot found
     }
 
-    bool delete_entry(HashMapT* h_map, const int key) {
+    bool delete_entry(const HashMapT* h_map, const int key) {
         Entry** index = search(h_map, key);
         if (index == nullptr) {
             return false; // not in table
@@ -129,15 +146,13 @@ namespace lab05
             "Yara Martinez", "Zachary King"
         };
         constexpr int names_count = sizeof(names) / sizeof(names[0]);
-        Entry *entries = new Entry[size];
+        auto entries = new Entry[size];
         int *keys = new int[size];
         FillRandomArray(keys, size, 0, 50000, true, UNSORTED);
 
-        srand(clock());
-
         for (int i = 0; i < size; i++) {
             entries[i].id = keys[i];
-            strcpy(entries[i].name, names[rand() % names_count].c_str());
+            strcpy(entries[i].name, names[random_number(0, names_count - 1) % names_count].c_str());
         }
 
 
@@ -145,7 +160,7 @@ namespace lab05
         return entries;
     }
 
-    std::vector<int> fill_hashmap(HashMapT* h_map, float desired_fill) {
+    std::vector<int> fill_hashmap(const HashMapT* h_map, float desired_fill) {
         constexpr int mock_size = HASHMAP_SIZE + 1500; // + 1500 unused for not found tests
         Entry* mock = generate_mock_data(mock_size);
         std::vector<int> inserted_ids;
@@ -168,12 +183,12 @@ namespace lab05
             } else miss_cnt++;
         }
 
-        printf("Fill factor: %.2f vs desired_fill: %.2f; miss_cnt: %d\n", (float)inserted_ids.size() / (float)HASHMAP_SIZE, desired_fill, miss_cnt);
+        printf("Fill factor: %.2f vs desired_fill: %.2f; miss_cnt: %d\n", static_cast<float>(inserted_ids.size()) / static_cast<float>(HASHMAP_SIZE), desired_fill, miss_cnt);
 
         std::vector<int> unique_unused;
         unique_unused.reserve(1500);
-        for (int i = 0; i < 1500; i++) {
-            unique_unused.push_back(mock[HASHMAP_SIZE + i].id);
+        for (int x = 0; x < 1500; x++) {
+            unique_unused.push_back(mock[HASHMAP_SIZE + x].id);
         }
 
         delete[] mock;
@@ -181,7 +196,7 @@ namespace lab05
         return unique_unused;
     }
 
-    void print_hashmap(HashMapT* h_map) {
+    void print_hashmap(const HashMapT* h_map) {
         for (int i = 0; i < h_map->size; i++) {
             if (h_map->arr[i] != nullptr && h_map->arr[i] != TOMBSTONE) {
                 printf("id: %d; name: %s\n", h_map->arr[i]->id, h_map->arr[i]->name);
@@ -258,11 +273,12 @@ namespace lab05
 
 
     void performance(Profiler& profiler, AnalysisCase whichCase) {
-        const float alphas[] = {0.8f, 0.85f, 0.9f, 0.95f, 0.99f};
+        constexpr float alphas[] = {0.8f, 0.85f, 0.9f, 0.95f, 0.99f};
         constexpr int num_factors = sizeof alphas / sizeof alphas[0];
 
         std::vector<Record> statistics;
         statistics.reserve(num_factors);
+
         for (float alpha : alphas) {
             HashMapT* h_map = create_hashmap();
             std::vector<int> unused_ids = fill_hashmap(h_map, alpha);
@@ -270,10 +286,9 @@ namespace lab05
             uniform_inserted.reserve(1500);
 
             // now we sample 1500 entries from the hash table randomly
-            srand(clock());
             int cnt = 0;
             while (cnt < 1500) {
-                int idx = rand() % HASHMAP_SIZE;
+                int idx = random_number(0, HASHMAP_SIZE - 1);
                 if (h_map->arr[idx] != nullptr && h_map->arr[idx] != TOMBSTONE) {
                     uniform_inserted.push_back(h_map->arr[idx]->id);
                     cnt++;
@@ -283,8 +298,10 @@ namespace lab05
 
             // search for inserted and record effort
             int total_effort_f = 0;
-            int max_effort_f = INT_MIN;
+            int max_effort_f_sum = 0;
             for (int repeat = 0; repeat < 5; repeat++) {
+                int max_effort_f = INT_MIN;
+
                 for (const auto id : uniform_inserted) {
                     int effort = 0;
                     search(h_map, id, &effort);
@@ -294,14 +311,19 @@ namespace lab05
                         max_effort_f = effort;
                     }
                 }
+                max_effort_f_sum += max_effort_f;
             }
+
             total_effort_f /= 5;
-            float avg_effort_f = (float)total_effort_f / (float)uniform_inserted.size();
+            const float max_effort_f_avg = static_cast<float>(max_effort_f_sum) / 5.f;
+            const float avg_effort_f = static_cast<float>(total_effort_f) / static_cast<float>(uniform_inserted.size());
 
             // search for known unused ids and record effort
             int total_effort_nf = 0;
-            int max_effort_nf = INT_MIN;
+            int max_effort_nf_sum = 0;
+
             for (int repeat = 0; repeat < 5; repeat++) {
+                int max_effort_nf = INT_MIN;
                 for (const auto id : unused_ids) {
                     int effort = 0;
                     search(h_map, id, &effort);
@@ -311,18 +333,28 @@ namespace lab05
                         max_effort_nf = effort;
                     }
                 }
+
+                max_effort_nf_sum += max_effort_nf;
             }
 
             total_effort_nf /= 5;
-            float avg_effort_nf = (float)total_effort_nf / (float)unused_ids.size();
-            statistics.push_back({alpha, avg_effort_f, max_effort_f, avg_effort_nf, max_effort_nf});
+            const float max_effort_nf_avg = static_cast<float>(max_effort_nf_sum) / 5.f;
+            const float avg_effort_nf = static_cast<float>(total_effort_nf) / static_cast<float>(unused_ids.size());
+            statistics.push_back({alpha, avg_effort_f, max_effort_f_avg, avg_effort_nf, max_effort_nf_avg});
 
             delete_hashmap(&h_map);
         }
 
-        printf("Fill factor | AVG Effort | Max Effort | AVG Effort NF | Max Effort NF\n");
+        printf("\nFill factor | AVG Effort | Max Effort | AVG Effort NF | Max Effort NF\n");
         for (const auto record : statistics) {
-            printf("alpha: %.2f |   %.4f   |     %d     |     %.4f     | %d\n", record.alpha, record.avg_effort_f, record.max_effort_f, record.avg_effort_nf, record.max_effort_nf);
+            printf("alpha: %.2f |   %.4f   |     %.4f     |     %.4f     | %.4f\n", record.alpha, record.avg_effort_f, record.max_effort_f_avg, record.avg_effort_nf, record.max_effort_nf_avg);
         }
+
+        // TEST AFTER DELETIONS
+        //
+        HashMapT* h_map = create_hashmap();
+        fill_hashmap(h_map, 0.99f);
+        delete_hashmap(&h_map);
+        // NOLINTNEXTLINE
     }
 }
