@@ -4,14 +4,10 @@
 #include "catch2.hpp"
 
 #include "commandline.h"
-#include "Profiler.h"
-
 #include <cstdio>
 #include <string>
 
 using namespace lab05;
-
-Profiler profiler("quick sort");
 
 void demo(const CommandArgs& args)
 {
@@ -28,8 +24,7 @@ void test(const CommandArgs& args)
 void perf(const CommandArgs& args)
 {
     const auto whichCase = args.empty()? AVERAGE: strToCase(args[0]);
-    performance(profiler, whichCase);
-    profiler.reset();
+    performance(whichCase);
 }
 
 void init_menu(const CommandArgs& args) {
