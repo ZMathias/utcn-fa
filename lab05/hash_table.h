@@ -72,10 +72,9 @@ namespace lab05
     /**
      * @brief Performance analysis for the sorting algorithms
      *
-     * @param profiler profiler to use
      * @param whichCase one of AVERAGE, BEST or WORST cases
      */
-    void performance(Profiler& profiler, AnalysisCase whichCase);
+    void performance(AnalysisCase whichCase);
 
     void init_global_hashmap(int size);
     void search_global_hashmap(int id);

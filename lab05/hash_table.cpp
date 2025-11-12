@@ -305,7 +305,7 @@ namespace lab05
     }
 
 
-    void performance(Profiler& profiler, AnalysisCase whichCase) {
+    void performance(AnalysisCase whichCase) {
         constexpr float alphas[] = {0.8f, 0.85f, 0.9f, 0.95f, 0.99f};
         constexpr int num_factors = sizeof alphas / sizeof alphas[0];
 
