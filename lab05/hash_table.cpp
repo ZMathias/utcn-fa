@@ -132,7 +132,7 @@ namespace lab05
             if (arr[h]->id == value->id) {
                 if (arr[h] != value) {
                     delete arr[h];
-                    arr[h] = value;
+                    arr[h] = copy_entry(value);
                 } // else no need to update because they are already the same structure
 
                 return true;
@@ -227,7 +227,6 @@ namespace lab05
         }
 
         const float new_fill = static_cast<float>(h_map->inserted) / static_cast<float>(HASHMAP_SIZE);
-        printf("\nFill factor after deletion: %.2f\n", new_fill);
     }
 
     void print_hashmap(const HashMapT* h_map) {
@@ -326,23 +325,18 @@ namespace lab05
                 auto unused = fill_hashmap(h_map, alpha);
                 // hashmap is filled and now we begin sampling
 
-                int count = 0;
                 int max_effort_f = -1; // effort will never be negative
 
-                while (count < 1500) {
-                    const int index = random_number(0, HASHMAP_SIZE - 1);
-                    if (h_map->arr[index] != nullptr && h_map->arr[index] != TOMBSTONE) {
-                        int effort = 0;
+                for (int x = 0; x < 1500; x++) {
+                    int effort = 0;
 
-                        search(h_map, h_map->arr[index]->id, &effort);
+                    search(h_map, random_id(h_map), &effort);
 
-                        if (effort > max_effort_f) {
-                            max_effort_f = effort;
-                        }
-
-                        total_effort_f += effort;
-                        count++;
+                    if (effort > max_effort_f) {
+                        max_effort_f = effort;
                     }
+
+                    total_effort_f += effort;
                 }
 
                 total_max_effort_f += max_effort_f;
