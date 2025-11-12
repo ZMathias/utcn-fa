@@ -296,7 +296,7 @@ namespace lab05
                     if (h_map->arr[idx] != nullptr && h_map->arr[idx] != TOMBSTONE) {
                         int effort = 0;
 
-                        search(h_map, idx, &effort);
+                        search(h_map, h_map->arr[idx]->id, &effort);
                         total_effort_f += effort;
 
                         if (effort > max_effort_f) {
