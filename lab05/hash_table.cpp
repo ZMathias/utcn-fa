@@ -434,4 +434,264 @@ namespace lab05
         }
         // NOLINTNEXTLINE
     }
+
+
+    TEST_CASE("Hash function produces valid indices") {
+        for (int i = 0; i < 100; i++) {
+            int h = hash(12345, i);
+            REQUIRE(h >= 0);
+            REQUIRE(h < HASHMAP_SIZE);
+        }
+    }
+
+    TEST_CASE("Create hashmap initializes correctly") {
+        HashMapT* h_map = create_hashmap();
+        REQUIRE(h_map != nullptr);
+        REQUIRE(h_map->arr != nullptr);
+        REQUIRE(h_map->size == HASHMAP_SIZE);
+        REQUIRE(h_map->inserted == 0);
+
+        // Check all slots are initialized to nullptr
+        for (int i = 0; i < HASHMAP_SIZE; i++) {
+            REQUIRE(h_map->arr[i] == nullptr);
+        }
+
+        delete_hashmap(&h_map);
+        REQUIRE(h_map == nullptr);
+    }
+
+    TEST_CASE("Insert single entry") {
+        HashMapT* h_map = create_hashmap();
+        Entry entry = {100, "Test User"};
+
+        bool result = insert(h_map, &entry);
+        REQUIRE(result == true);
+        REQUIRE(h_map->inserted == 1);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Search finds inserted entry") {
+        HashMapT* h_map = create_hashmap();
+        Entry entry = {200, "Alice"};
+
+        insert(h_map, &entry);
+        int effort = 0;
+        Entry** found = search(h_map, 200, &effort);
+
+        REQUIRE(found != nullptr);
+        REQUIRE((*found)->id == 200);
+        REQUIRE(strcmp((*found)->name, "Alice") == 0);
+        REQUIRE(effort > 0);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Search returns nullptr for non-existent entry") {
+        HashMapT* h_map = create_hashmap();
+        Entry entry = {300, "Bob"};
+
+        insert(h_map, &entry);
+        Entry** found = search(h_map, 999);
+
+        REQUIRE(found == nullptr);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Insert multiple entries with different keys") {
+        HashMapT* h_map = create_hashmap();
+
+        for (int i = 0; i < 100; i++) {
+            Entry entry = {i, "User"};
+            bool result = insert(h_map, &entry);
+            REQUIRE(result == true);
+        }
+
+        REQUIRE(h_map->inserted == 100);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Insert updates existing entry with same key") {
+        HashMapT* h_map = create_hashmap();
+        Entry entry1 = {500, "Original"};
+        Entry entry2 = {500, "Updated"};
+
+        insert(h_map, &entry1);
+        REQUIRE(h_map->inserted == 1);
+
+        insert(h_map, &entry2);
+        REQUIRE(h_map->inserted == 1); // Count should not increase
+
+        Entry** found = search(h_map, 500);
+        REQUIRE(found != nullptr);
+        REQUIRE(strcmp((*found)->name, "Updated") == 0);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Delete removes entry") {
+        HashMapT* h_map = create_hashmap();
+        Entry entry = {600, "ToDelete"};
+
+        insert(h_map, &entry);
+        REQUIRE(h_map->inserted == 1);
+
+        bool deleted = delete_entry(h_map, 600);
+        REQUIRE(deleted == true);
+        REQUIRE(h_map->inserted == 0);
+
+        Entry** found = search(h_map, 600);
+        REQUIRE(found == nullptr);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Delete non-existent entry returns false") {
+        HashMapT* h_map = create_hashmap();
+
+        bool deleted = delete_entry(h_map, 999);
+        REQUIRE(deleted == false);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Delete creates tombstone") {
+        HashMapT* h_map = create_hashmap();
+        Entry entry = {700, "TombTest"};
+
+        insert(h_map, &entry);
+        int h = hash(700, 0);
+
+        delete_entry(h_map, 700);
+        REQUIRE(h_map->arr[h] == TOMBSTONE);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Insert reuses tombstone slot") {
+        HashMapT* h_map = create_hashmap();
+        Entry entry1 = {800, "First"};
+        Entry entry2 = {800, "Second"};
+
+        insert(h_map, &entry1);
+        delete_entry(h_map, 800);
+
+        // Insert new entry that hashes to same location
+        insert(h_map, &entry2);
+        REQUIRE(h_map->inserted == 1);
+
+        Entry** found = search(h_map, 800);
+        REQUIRE(found != nullptr);
+        REQUIRE(strcmp((*found)->name, "Second") == 0);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Search continues past tombstone") {
+        HashMapT* h_map = create_hashmap();
+
+        // Create collision scenario
+        Entry entry1 = {900, "Entry1"};
+        Entry entry2 = {901, "Entry2"};
+
+        insert(h_map, &entry1);
+        insert(h_map, &entry2);
+        delete_entry(h_map, 900);
+
+        // Should still find entry2
+        Entry** found = search(h_map, 901);
+        REQUIRE(found != nullptr);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Effort tracking increments correctly") {
+        HashMapT* h_map = create_hashmap();
+        Entry entry = {1000, "EffortTest"};
+
+        insert(h_map, &entry);
+
+        int effort = 0;
+        search(h_map, 1000, &effort);
+        REQUIRE(effort >= 1); // At least one probe
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Copy entry creates independent copy") {
+        Entry original = {1100, "Original"};
+        Entry* copy = copy_entry(&original);
+
+        REQUIRE(copy != nullptr);
+        REQUIRE(copy != &original);
+        REQUIRE(copy->id == original.id);
+        REQUIRE(strcmp(copy->name, original.name) == 0);
+
+        // Modify copy
+        strcpy(copy->name, "Modified");
+        REQUIRE(strcmp(original.name, "Original") == 0);
+
+        delete copy;
+    }
+
+    TEST_CASE("Fill hashmap achieves target fill factor") {
+        HashMapT* h_map = create_hashmap();
+        float target_alpha = 0.8f;
+
+        fill_hashmap(h_map, target_alpha);
+        float actual_alpha = static_cast<float>(h_map->inserted) / HASHMAP_SIZE;
+
+        REQUIRE(actual_alpha >= target_alpha);
+        REQUIRE(actual_alpha < target_alpha + 0.01f); // Within 1%
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Insert returns false for null entry") {
+        HashMapT* h_map = create_hashmap();
+
+        bool result = insert(h_map, nullptr);
+        REQUIRE(result == false);
+        REQUIRE(h_map->inserted == 0);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Random ID returns valid ID from filled table") {
+        HashMapT* h_map = create_hashmap();
+        fill_hashmap(h_map, 0.5f);
+
+        int id = random_id(h_map);
+        REQUIRE(id != -1);
+
+        // Verify the ID exists
+        Entry** found = search(h_map, id);
+        REQUIRE(found != nullptr);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Random ID returns -1 for empty table") {
+        HashMapT* h_map = create_hashmap();
+
+        int id = random_id(h_map);
+        REQUIRE(id == -1);
+
+        delete_hashmap(&h_map);
+    }
+
+    TEST_CASE("Decrease fill reduces elements correctly") {
+        HashMapT* h_map = create_hashmap();
+        fill_hashmap(h_map, 0.95f);
+
+        decrease_fill(h_map, 0.8f);
+        float actual_alpha = static_cast<float>(h_map->inserted) / HASHMAP_SIZE;
+
+        REQUIRE(actual_alpha <= 0.8f);
+        REQUIRE(actual_alpha >= 0.79f);
+
+        delete_hashmap(&h_map);
+    }
 }
