@@ -28,6 +28,7 @@ namespace lab05
     {
         Entry** arr;
         int size;
+        int inserted;
     };
 
     /**
@@ -54,9 +55,9 @@ namespace lab05
 
     Entry* generate_mock_data(const int size);
 
-    bool insert(const HashMapT* h_map, Entry* value);
+    bool insert(HashMapT* h_map, Entry* value);
 
-    std::vector<int> fill_hashmap(const HashMapT* h_map, float desired_fill);
+    std::vector<int> fill_hashmap(HashMapT *h_map, float desired_fill);
 
     void print_hashmap(const HashMapT* h_map);
     void print_global_hashmap();

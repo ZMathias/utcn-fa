@@ -19,8 +19,11 @@ namespace lab05
     HashMapT* create_hashmap() {
         // NOLINTNEXTLINE
         auto* h_map = new HashMapT;
+
         h_map->arr = new Entry*[HASHMAP_SIZE]; // memory management is deferred to the user
         h_map->size = HASHMAP_SIZE;
+        h_map->inserted = 0;
+
         memset(h_map->arr, 0, HASHMAP_SIZE * sizeof(Entry*)); // zero memory
 
         return h_map;
@@ -79,7 +82,7 @@ namespace lab05
         return nullptr; // none found, nullptr signifies miss
     }
 
-    bool insert(const HashMapT* h_map, Entry* value) {
+    bool insert(HashMapT* h_map, Entry* value) {
         if (value == nullptr) {
             return false;
         }
@@ -95,11 +98,13 @@ namespace lab05
                 if (first_tombstone != -1) {
                     // NOLINTNEXTLINE
                     arr[first_tombstone] = copy_entry(value);
+                    h_map->inserted++;
                     return true;
                 }
 
                 // NOLINTNEXTLINE
                 arr[h] = copy_entry(value);
+                h_map->inserted++;
                 return true;
             }
 
@@ -110,6 +115,7 @@ namespace lab05
                 continue;
             }
 
+            // update if already in the map
             if (arr[h]->id == value->id) {
                 if (arr[h] != value) {
                     delete arr[h];
@@ -160,30 +166,31 @@ namespace lab05
         return entries;
     }
 
-    std::vector<int> fill_hashmap(const HashMapT* h_map, float desired_fill) {
+    std::vector<int> fill_hashmap(HashMapT *h_map, float desired_fill) {
         constexpr int mock_size = HASHMAP_SIZE + 1500; // + 1500 unused for not found tests
         Entry* mock = generate_mock_data(mock_size);
-        std::vector<int> inserted_ids;
 
         const int to_insert = HASHMAP_SIZE * desired_fill;
-        inserted_ids.reserve(to_insert);
 
         int i = 0;
         int miss_cnt = 0;
         for (; i <= to_insert; i++) {
-            if (insert(h_map, mock + i)) {
-                inserted_ids.push_back(mock[i].id);
-            } else miss_cnt++;
+            if (!insert(h_map, mock + i)) {
+                miss_cnt++;
+            }
         }
 
         // in case of misses
-        while (inserted_ids.size() < to_insert && i < mock_size) {
-            if (insert(h_map, mock + i)) {
-                inserted_ids.push_back(mock[i].id);
-            } else miss_cnt++;
+        while (h_map->inserted < to_insert && i < mock_size) {
+            if (!insert(h_map, mock + i)) {
+                miss_cnt++;
+            }
         }
 
-        printf("Fill factor: %.2f vs desired_fill: %.2f; miss_cnt: %d\n", static_cast<float>(inserted_ids.size()) / static_cast<float>(HASHMAP_SIZE), desired_fill, miss_cnt);
+        if (miss_cnt != 0) {
+            printf("Fill factor: %.2f vs desired_fill: %.2f; miss_cnt: %d; inserted: %d\n",
+                   static_cast<float>(h_map->inserted) / static_cast<float>(HASHMAP_SIZE), desired_fill, miss_cnt, h_map->inserted);
+        }
 
         std::vector<int> unique_unused;
         unique_unused.reserve(1500);
@@ -194,6 +201,10 @@ namespace lab05
         delete[] mock;
 
         return unique_unused;
+    }
+
+    void decrease_fill(const HashMapT *h_map, const float desired_fill) {
+
     }
 
     void print_hashmap(const HashMapT* h_map) {
@@ -350,6 +361,9 @@ namespace lab05
         //
         HashMapT* h_map = create_hashmap();
         fill_hashmap(h_map, 0.99f);
+
+
+
         delete_hashmap(&h_map);
         // NOLINTNEXTLINE
     }
