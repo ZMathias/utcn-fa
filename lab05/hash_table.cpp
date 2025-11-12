@@ -282,19 +282,6 @@ namespace lab05
         for (float alpha : alphas) {
             HashMapT* h_map = create_hashmap();
             std::vector<int> unused_ids = fill_hashmap(h_map, alpha);
-            std::vector<int> uniform_inserted;
-            uniform_inserted.reserve(1500);
-
-            // now we sample 1500 entries from the hash table randomly
-            int cnt = 0;
-            while (cnt < 1500) {
-                int idx = random_number(0, HASHMAP_SIZE - 1);
-                if (h_map->arr[idx] != nullptr && h_map->arr[idx] != TOMBSTONE) {
-                    uniform_inserted.push_back(h_map->arr[idx]->id);
-                    cnt++;
-                }
-            }
-            // now we have precisely 1500 used and unused, we can run the test for different fill factors
 
             // search for inserted and record effort
             int total_effort_f = 0;
@@ -302,21 +289,30 @@ namespace lab05
             for (int repeat = 0; repeat < 5; repeat++) {
                 int max_effort_f = INT_MIN;
 
-                for (const auto id : uniform_inserted) {
-                    int effort = 0;
-                    search(h_map, id, &effort);
-                    total_effort_f += effort;
+                // now we sample 1500 entries from the hash table randomly
+                int cnt = 0;
+                while (cnt < 1500) {
+                    int idx = random_number(0, HASHMAP_SIZE - 1);
+                    if (h_map->arr[idx] != nullptr && h_map->arr[idx] != TOMBSTONE) {
+                        int effort = 0;
 
-                    if (effort > max_effort_f) {
-                        max_effort_f = effort;
+                        search(h_map, idx, &effort);
+                        total_effort_f += effort;
+
+                        if (effort > max_effort_f) {
+                            max_effort_f = effort;
+                        }
+
+                        cnt++;
                     }
                 }
+
                 max_effort_f_sum += max_effort_f;
             }
 
             total_effort_f /= 5;
             const float max_effort_f_avg = static_cast<float>(max_effort_f_sum) / 5.f;
-            const float avg_effort_f = static_cast<float>(total_effort_f) / static_cast<float>(uniform_inserted.size());
+            const float avg_effort_f = static_cast<float>(total_effort_f) / 1500.f;
 
             // search for known unused ids and record effort
             int total_effort_nf = 0;
