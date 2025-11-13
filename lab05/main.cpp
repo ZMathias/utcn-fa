@@ -58,6 +58,14 @@ void print_menu(const CommandArgs& args) {
     print_global_hashmap();
 }
 
+void insert_menu(const CommandArgs& args) {
+    if (args.empty()) {
+        printf("usage: insert [id] [name]\n");
+        return;
+    }
+    insert_global_hashmap(atoi(args[0]), args[1]);
+}
+
 int main()
 {
     const std::vector<CommandSpec> commands =
@@ -68,7 +76,8 @@ int main()
         {"init", init_menu, "init id (opt) -- Creates and inserts mock data into a global hashmap for testing"},
         {"search", search_menu, "search [id] -- Searches the global hashmap and prints the entry if available."},
         {"delete", delete_menu, "delete [id] -- Deletes an entry"},
-        {"print", print_menu, "Prints the hashmap."}
+        {"print", print_menu, "Prints the hashmap."},
+        {"insert", insert_menu, "insert [id] [name]"}
     };
 
     return runCommandLoop(commands);
