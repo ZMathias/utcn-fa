@@ -230,6 +230,11 @@ namespace lab05
     }
 
     void print_hashmap(const HashMapT* h_map) {
+        if (h_map == nullptr) {
+            printf("Hashmap is empty!\n");
+            return;
+        }
+
         for (int i = 0; i < HASHMAP_SIZE; i++) {
             if (h_map->arr[i] != nullptr && h_map->arr[i] != TOMBSTONE) {
                 printf("id: %d; name: %s\n", h_map->arr[i]->id, h_map->arr[i]->name);
