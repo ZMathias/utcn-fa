@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/utcn-fa.iml" filepath="$PROJECT_DIR$/.idea/utcn-fa.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/lab06.iml" filepath="$PROJECT_DIR$/.idea/lab06.iml" />
     </modules>
   </component>
 </project>
