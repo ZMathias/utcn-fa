@@ -80,6 +80,7 @@ namespace lab05
     void search_global_hashmap(int id);
     void delete_from_global_hashmap(int id);
     void delete_global_hashmap();
+    void insert_global_hashmap(const int id, const char* name);
 }
 
 #endif //LAB05_HASH_TABLE_H

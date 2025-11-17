@@ -29,6 +29,15 @@ namespace lab05
         return -1; // timeout
     }
 
+    int random_id(const int *keys, int it) {
+        // divide into 1500 segments
+        const int seg_len = HASHMAP_SIZE / 1500;
+        const int low = it * seg_len;
+        const int high = low + seg_len;
+
+        return keys[low + random_number(low, high)];
+    }
+
     HashMapT* create_hashmap() {
         // NOLINTNEXTLINE
         auto* h_map = new HashMapT;
@@ -68,6 +77,7 @@ namespace lab05
     }
 
     int hash(const int key, const int idx) {
+        if (idx != 0) printf("Collision!\n");
         constexpr int c1 = 1;
         constexpr int c2 = 1;
         return (key + c1*idx + c2*idx*idx) % HASHMAP_SIZE;
@@ -230,11 +240,23 @@ namespace lab05
     }
 
     void print_hashmap(const HashMapT* h_map) {
+        if (h_map == nullptr) {
+            printf("Hashmap is empty!\n");
+            return;
+        }
+
         for (int i = 0; i < HASHMAP_SIZE; i++) {
             if (h_map->arr[i] != nullptr && h_map->arr[i] != TOMBSTONE) {
-                printf("id: %d; name: %s\n", h_map->arr[i]->id, h_map->arr[i]->name);
+                printf("[%d] id: %d; name: %s\n", i, h_map->arr[i]->id, h_map->arr[i]->name);
             }
         }
+    }
+
+    void insert_global_hashmap(const int id, const char* name) {
+        Entry entry;
+        entry.id = id;
+        strcpy(entry.name, name);
+        insert(global_hmap, &entry);
     }
 
     void print_global_hashmap() {
