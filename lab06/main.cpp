@@ -90,6 +90,7 @@ int main() {
     demo_traversals(b_root);
 
     delete_tree(&m_root);
+    delete_tree(&bm_root);
     delete_tree(&b_root);
     return 0;
 }
