@@ -9,6 +9,12 @@ enum directions
     PREORDER, INORDER, POSTORDER
 };
 
+enum tree_type
+{
+    MULTIWAY_BINARY = 0,
+    BINARY = 1,
+};
+
 struct BNodeT
 {
     int value = 0;
@@ -36,9 +42,8 @@ void traverse_rec(const BNodeT* root, int type = PREORDER);
 void traverse_it(BNodeT* root, int type = PREORDER);
 
 void pretty_print(int *parent, int size);
-void pretty_print(BNodeT* root, int depth = 0);
-void pretty_print(MNodeT* root, int depth = 0);
-void pretty_print_rotated(BNodeT* root, int depth = 0);
+void pretty_print(MNodeT* root);
+void pretty_print(BNodeT* root, int type);
 
 void delete_tree(MNodeT** root);
 void delete_tree(BNodeT** root);

@@ -65,7 +65,8 @@ MNodeT* transform_r1_to_r2(const int* parent, int size) {
         return nullptr;
     }
 
-    MNodeT* nodes[size];
+    MNodeT** nodes = new MNodeT*[size];
+    //MNodeT* nodes[size];
 
     for (int i = 0; i < size; i++) {
         nodes[i] = create_mnode(i + 1);
@@ -82,6 +83,7 @@ MNodeT* transform_r1_to_r2(const int* parent, int size) {
         add_child(nodes[parent[i] - 1], nodes[i]);
     }
 
+    delete[] nodes;
     return root;
 }
 
@@ -226,7 +228,7 @@ void pretty_print(int *parent, int size) {
     pretty_print_r1(parent, size, -1, 0);
 }
 
-void pretty_print(BNodeT* root, const int depth) {
+void pretty_print_bin(BNodeT* root, const int depth, int type) {
     if (root == nullptr) {
         return;
     }
@@ -239,24 +241,8 @@ void pretty_print(BNodeT* root, const int depth) {
     }
 
     printf("%d\n", root->value);
-    pretty_print(root->left, depth + 1);
-    pretty_print(root->right, depth);
-}
-
-void pretty_print_rotated(BNodeT* root, const int depth) {
-    if (root == nullptr) {
-        return;
-    }
-
-    constexpr int spaces_per_depth = 2;
-    pretty_print_rotated(root->right, depth + 1);
-
-    for (int i = 0; i < depth * spaces_per_depth; i++) {
-        putchar(' ');
-    }
-
-    printf("%d\n", root->value);
-    pretty_print_rotated(root->left, depth + 1);
+    pretty_print_bin(root->left, depth + 1, type);
+    pretty_print_bin(root->right, depth + type, type);
 }
 
 void pretty_print(MNodeT* root, const int depth) {
@@ -274,6 +260,30 @@ void pretty_print(MNodeT* root, const int depth) {
     printf("%d\n", root->value);
     for (int i = 0; i < root->size; i++) {
         pretty_print(root->children[i], depth + 1);
+    }
+}
+
+void pretty_print(MNodeT* root) {
+    pretty_print(root, 0);
+}
+
+void pretty_print(BNodeT* root, int type) {
+    switch (type) {
+    case BINARY:
+        {
+            pretty_print_bin(root, 0, 1);
+            break;
+        }
+
+    case MULTIWAY_BINARY:
+        {
+            pretty_print_bin(root, 0, 0);
+            break;
+        }
+        default:
+        {
+            break;
+        }
     }
 }
 

@@ -31,7 +31,7 @@ std::vector<int> build_array(const std::string& line) {
 }
 
 bool demo_traversals(BNodeT* root) {
-    pretty_print(root);
+    pretty_print(root, BINARY);
 
     printf("\n\nPreorder:\nrec: ");
     traverse_rec(root, PREORDER);
@@ -58,29 +58,31 @@ bool demo_traversals(BNodeT* root) {
 int main() {
     std::string line;
 
+    // parent array
     printf("Enter parent array of tree: ");
     std::getline(std::cin, line);
 
     // build parent vector from input
     auto parent = build_array(line);
 
+    // pretty print R1 parent array representation
     printf("\nPretty Print R1:\n");
-    // pretty print R1
     pretty_print(parent.data(), static_cast<int>(parent.size()));
 
     // T1
     MNodeT* m_root = transform_r1_to_r2(parent.data(), parent.size());
 
+
+    // pretty print R2 multiway representation
     printf("\nPretty print R2:\n");
-    // pretty print R2
     pretty_print(m_root);
 
     // T2
     BNodeT* bm_root = transform_r2_to_r3(m_root);
 
+    // pretty print R3 binary multiway representation
     printf("\nPretty print R3:\n");
-    // pretty print R3
-    pretty_print(bm_root);
+    pretty_print(bm_root, MULTIWAY_BINARY);
 
     printf("Enter preorder with -1 as empty nodes (finish with -1 aswell): ");
     std::getline(std::cin, line);
