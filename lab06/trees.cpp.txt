@@ -1,6 +1,121 @@
 #include "trees.h"
 
-#include <cstdio>
+BNodeT* create_bnode(int value) {
+    auto* b_root = new BNodeT;
+    b_root->left=nullptr;
+    b_root->right=nullptr;
+    b_root->value = value;
+    b_root->parent = nullptr;
+
+    return b_root;
+}
+
+MNodeT* create_mnode(const int value) {
+    auto* node = new MNodeT;
+    node->size = 0;
+    node->value = value;
+
+    return node;
+}
+
+bool add_child(MNodeT *node, MNodeT* child) {
+    if (node == nullptr || child == nullptr)
+        return false;
+
+    if (node->size >= 100) {
+        return false;
+    }
+
+    node->children[node->size++] = child;
+    return true;
+}
+
+BNodeT* build_tree_w(const std::vector<int>& trav, int &pos) {
+    if (pos >= trav.size()) {
+        return nullptr;
+    }
+
+    if (trav[pos] == -1) {
+        pos++; // consume -1
+        return nullptr;
+    }
+
+    BNodeT* root = create_bnode(trav[pos++]);
+    root->left = build_tree_w(trav, pos);
+    root->right = build_tree_w(trav, pos);
+
+    if (root->left != nullptr) {
+        root->left->parent = root;
+    }
+
+    if (root->right != nullptr) {
+        root->right->parent = root;
+    }
+
+    return root;
+}
+
+BNodeT* build_tree(const std::vector<int>& trav) {
+    int i = 0;
+    return build_tree_w(trav, i);
+}
+
+MNodeT* transform_r1_to_r2(const int* parent, int size) {
+    if (parent == nullptr) {
+        return nullptr;
+    }
+
+    MNodeT* nodes[size];
+
+    for (int i = 0; i < size; i++) {
+        nodes[i] = create_mnode(i + 1);
+        nodes[i]->size = 0;
+    }
+
+    MNodeT* root = nullptr;
+    for (int i = 0; i < size; i++) {
+        if (parent[i] == -1) {
+            root = nodes[i];
+            continue;
+        }
+        // add node as child to its parent node
+        add_child(nodes[parent[i] - 1], nodes[i]);
+    }
+
+    return root;
+}
+
+BNodeT* transform_r2_to_r3(const MNodeT* m_root) {
+    if (m_root == nullptr) {
+        return nullptr;
+    }
+
+    const auto b_root = create_bnode(m_root->value);
+
+    if (m_root->size == 0) {
+        return b_root;
+    }
+
+    b_root->left = transform_r2_to_r3(m_root->children[0]);
+    if (b_root->left != nullptr) {
+        b_root->left->parent = b_root;
+    }
+
+    BNodeT* curr_bnode = b_root->left;
+
+    for (int i = 1; i < m_root->size; i++) {
+        // transform child
+        curr_bnode -> right = transform_r2_to_r3(m_root->children[i]);
+
+        if (curr_bnode->right != nullptr) {
+            curr_bnode->right->parent = curr_bnode; // for binary representation it should point to the structural parent, not the logical parent for traversals
+        }
+
+        curr_bnode = curr_bnode->right;
+    }
+
+    return b_root;
+}
 
 void traverse_rec(const BNodeT* root, const int type) {
     if (root == nullptr) {
@@ -24,8 +139,10 @@ void traverse_rec(const BNodeT* root, const int type) {
     }
 }
 
-
 void traverse_it(BNodeT* root, int type) {
+    if (root == nullptr) {
+        return;
+    }
     int dir = 1;
     BNodeT* node = root;
 
@@ -95,13 +212,17 @@ void pretty_print_r1(int *parent, int size, int node, int depth) {
             for (int x = 0; x < depth * spaces_per_depth; x++) {
                 putchar(' ');
             }
-            printf("%d\n", i);
-            pretty_print_r1(parent, size, i, depth + 1);
+            printf("%d\n", i + 1);
+            pretty_print_r1(parent, size, i + 1, depth + 1);
         }
     }
 }
 
 void pretty_print(int *parent, int size) {
+    if (parent == nullptr) {
+        return;
+    }
+
     pretty_print_r1(parent, size, -1, 0);
 }
 
@@ -119,7 +240,7 @@ void pretty_print(BNodeT* root, const int depth) {
 
     printf("%d\n", root->value);
     pretty_print(root->left, depth + 1);
-    pretty_print(root->right, depth + 1);
+    pretty_print(root->right, depth);
 }
 
 void pretty_print_rotated(BNodeT* root, const int depth) {
@@ -154,4 +275,29 @@ void pretty_print(MNodeT* root, const int depth) {
     for (int i = 0; i < root->size; i++) {
         pretty_print(root->children[i], depth + 1);
     }
+}
+
+void delete_tree(MNodeT** root) {
+    if (root == nullptr || (*root) == nullptr) {
+        return;
+    }
+
+    for (int i = 0; i < (*root)->size; i++) {
+        delete_tree((*root)->children + i);
+    }
+
+    delete (*root);
+    *root = nullptr;
+}
+
+void delete_tree(BNodeT** root) {
+    if (root == nullptr || (*root) == nullptr) {
+        return;
+    }
+
+    delete_tree(&(*root)->left);
+    delete_tree(&(*root)->right);
+
+    delete (*root);
+    *root = nullptr;
 }
