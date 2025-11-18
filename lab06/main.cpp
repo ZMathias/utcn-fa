@@ -4,6 +4,20 @@
 
 #include "trees.h"
 
+/*
+ * Author: Zágoni Mátyás
+ * Group: 30421
+ *
+ * This project implements lab-assignment number 6 (Multi-way trees)
+ * There are several overloaded pretty_print functions for printing each representation (R1, R2, R3 and an additional classical binary tree)
+ * It contains both transformations T1, T2
+ * It contains both recursive and iterative versions of binary tree traversal functions.
+ * It also uses a binary tree building algorithm from preorder traversal using -1 placeholders for null nodes for deterministic tree building
+ *
+ * Iterative and recursive traversals are compared and user is prompted for parent array which should be indexed from 1
+ *
+ */
+
 BNodeT* scan_tree(const std::string& input) {
     std::istringstream ss(input);
 

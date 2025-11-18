@@ -65,7 +65,7 @@ MNodeT* transform_r1_to_r2(const int* parent, int size) {
         return nullptr;
     }
 
-    MNodeT** nodes = new MNodeT*[size];
+    auto** nodes = new MNodeT*[size];
     //MNodeT* nodes[size];
 
     for (int i = 0; i < size; i++) {
