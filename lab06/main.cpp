@@ -76,7 +76,11 @@ int main() {
     printf("Enter parent array of tree: ");
     std::getline(std::cin, line);
 
-    // build parent vector from input
+    if (line.empty()) {
+        printf("Using default parrent array (2 7 5 2 7 7 -1 5 2)\n");
+        line = "2 7 5 2 7 7 -1 5 2";
+    }
+         // build parent vector from input
     auto parent = build_array(line);
 
     // pretty print R1 parent array representation
@@ -100,6 +104,11 @@ int main() {
 
     printf("Enter preorder with -1 as empty nodes (finish with -1 aswell): ");
     std::getline(std::cin, line);
+
+    if (line.empty()) {
+        printf("Using default tree {5, 4, 11, 7, -1, -1, 2, -1, -1, -1, 8, 13, -1, -1, 4, -1, 1, -1, -1}\n");
+        line = "5 4 11 7 -1 -1 2 -1 -1 -1 8 13 -1 -1 4 -1 1 -1 -1";
+    }
 
     BNodeT* b_root = scan_tree(line);
 
