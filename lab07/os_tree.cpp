@@ -1,5 +1,14 @@
 #include "os_tree.h"
 
+/*
+ * Implementation of an order statistics augmented AVL tree
+ * The build_tree according to the master theorem is of O(n)
+ * os_select is of O(logn) because it traverses along the height of the tree
+ * os_delete is of O(logn) aswell
+ * The actual complexities of the code are a bit higher due to the AVL tree balancing act
+ * But that is of a constant around 1.45
+ */
+
 namespace lab07
 {
     int random_number(int lo, int hi) {
