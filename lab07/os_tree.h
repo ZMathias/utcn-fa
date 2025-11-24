@@ -11,6 +11,10 @@ struct Node {
 
 int get_height(const Node* root);
 int calc_height(const Node* root);
-void update_height(Node* root);
+void update_node(Node* root);
+
+Node *rotate_left(Node *root);
+
+Node *rotate_right(Node *root);
 
 #endif //LAB07_OS_TREE_H
