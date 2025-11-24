@@ -6,13 +6,18 @@
 Profiler profiler("ostree");
 
 void demo(const CommandArgs& args) {
-    const int n = args.empty() ? 10 : atoi(args[0]);
-    lab07::demonstrate(n);
+    int l = 1, r = 11;
+    if (!args.empty()) {
+        l = atoi(args[0]);
+        r = atoi(args[1]);
+    }
+    lab07::demonstrate(l, r);
 }
 
 void perf(const CommandArgs& args)
 {
     lab07::performance(profiler);
+    profiler.showReport();
     profiler.reset();
 }
 
