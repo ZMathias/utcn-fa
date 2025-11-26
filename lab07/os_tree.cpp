@@ -53,6 +53,10 @@ namespace lab07
         return root ? root->size : 0;
     }
 
+    void update_height(Node* root) {
+        root->height = 1 + std::max(get_height(root->left), get_height(root->right));
+    }
+
     void update_node(Node* root, Operation* op) {
         if (root == nullptr) {
             return;
@@ -125,7 +129,8 @@ namespace lab07
         node->right = build_tree(mid + 1, r, op);
 
         // when recursion unwinds we update the height of each node
-        update_node(node, op);
+        //update_node(node, op);
+        update_height(node);
 
         return node;
     }
@@ -136,19 +141,19 @@ namespace lab07
             return nullptr;
         }
 
-        if (op) op->count(3);
-
         int rank;
 
-        if (root->left == nullptr)
+        if (root->left == nullptr) {
+            if (op) op->count();
             rank = 1;
-        else
+        }
+        else {
+            if (op) op->count(2);
             rank = root->left->size + 1;
+        }
 
         if (ith == rank)
             return root;
-
-        if (op) op->count();
 
         if (ith < rank)
             return os_select(root->left, ith, op);
