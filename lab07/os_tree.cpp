@@ -297,6 +297,12 @@ namespace lab07
         Node* root = build_tree(l, r);
         pretty_print(root); // demo 1.3.1
 
+        /*root = os_delete(root, 9);
+        root = os_delete(root, 2);
+        root = os_delete(root, 5);
+
+        pretty_print(root);*/
+
         // demo 1.3.2
         int rand_int = random_number(l, r);
         Node *sel = os_select(root, rand_int);
