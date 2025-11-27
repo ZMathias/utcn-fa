@@ -159,7 +159,6 @@ namespace lab07
             return os_select(root->left, ith, op);
 
         return os_select(root->right, ith - rank, op);
-
     }
 
     Node* rebalance(Node* root) {
