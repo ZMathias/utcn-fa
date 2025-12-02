@@ -1,21 +1,33 @@
 #ifndef LAB07_SETS_H
 #define LAB07_SETS_H
-#include <algorithm>
-#include <commandline.h>
 #include <Profiler.h>
+#include <map>
+#include <tuple>
 #include <random>
 
 namespace lab08
 {
-    struct Node {
-        Node* p;
+    struct Set {
+        Set* parent;
         int key;
         int rank;
     };
 
-    void delete_set(Node** root);
-    void pretty_print(const Node* root, int depth = 0);
-    void demonstrate(int l, int r);
+    struct Edge {
+        int from, to;
+        int weight;
+    };
+
+    int partition(Edge* values, int l, int r);
+    void qsort(Edge* values, int l, int r);
+    void quickSort(Edge* values, int n);
+
+    Set* make_set(int x);
+    void set_union(Set* x, Set* y);
+
+    void kruskal(int N, Edge* edges, const int size, Edge** mst, int *out_size);
+
+    void demonstrate();
     void performance(Profiler &profiler);
 
 }

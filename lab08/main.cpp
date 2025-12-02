@@ -7,7 +7,7 @@ Profiler profiler("disjoint_sets");
 
 void demo(const CommandArgs& args) {
 
-    lab08::demonstrate(l, r);
+    lab08::demonstrate();
 }
 
 void perf(const CommandArgs& args)
