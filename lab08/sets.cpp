@@ -44,33 +44,36 @@ namespace lab08
         qsort(values, 0, n - 1);
     }
 
-    Set* make_set(const int x) {
+    Set* make_set(const int x, Operation* op) {
         Set* elem = new Set;
         elem->key = x;
         elem->parent = nullptr;
         elem->rank = 0;
+        if (op) op->count(4); // 1 alloc 3 assignments
         return elem;
     }
 
-    Set* find_set(Set* x) {
+    Set* find_set(Set* x, Operation* op) {
         if (x == nullptr) {
             return nullptr;
         }
 
+        if (op) op->count();
         if (x->parent == nullptr) {
             return x;
         }
 
-        Set* rep = find_set(x->parent);
+        Set* rep = find_set(x->parent, op);
 
+        if (op) op->count();
         x->parent = rep; // do path compression
 
         return rep;
     }
 
-    void set_union(Set* x, Set* y) {
-        Set* x_rep = find_set(x);
-        Set* y_rep = find_set(y);
+    void set_union(Set* x, Set* y, Operation* op) {
+        Set* x_rep = find_set(x, op);
+        Set* y_rep = find_set(y, op);
 
         if (x_rep == nullptr || y_rep == nullptr) {
             throw std::exception();
@@ -80,14 +83,24 @@ namespace lab08
             return;
         }
 
+
         if (x_rep->rank < y_rep->rank) {
+            if (op) op->count(2);
             x_rep->parent = y_rep;
         } else if (x_rep->rank > y_rep->rank) {
+            if (op) op->count(2);
             y_rep->parent = x_rep;
         } else {
             y_rep->parent = x_rep;
             x_rep->rank++;
+            if (op) op->count(2);
         }
+
+        if (op && x_rep->rank >= y_rep->rank) { // adjust for missed op counts when execution misses branch
+            op->count();
+            if (x_rep->rank <= y_rep->rank) op->count();
+        }
+
     }
 
     void print_sets(const std::vector<Set*>& sets) {
@@ -105,44 +118,104 @@ namespace lab08
         }
     }
 
-    void kruskal(int N, Edge* edges, const int size, Edge** mst, int *out_size) {
+    void kruskal(int nr_vertices, Edge* edges, const int size, Edge** mst, int *out_size, Operation* make_op, Operation* union_op, Operation* find_op) {
         if (edges == nullptr) {
             return;
         }
 
-        Set* vertices = new Set[N];
+        // the efficient version
+        /*Set* vertices = new Set[nr_vertices];
 
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < nr_vertices; i++) {
             vertices[i].key =  i;
             vertices[i].parent = nullptr;
             vertices[i].rank = 0;
+        }*/
+
+        // the benchmark version
+        Set** vertices = new Set*[nr_vertices];
+        for (int i = 0; i < nr_vertices; i++) {
+            vertices[i] = make_set(i, make_op);
         }
 
         *out_size = 0;
-        *mst = new Edge[N - 1]; // allocate data for the list of edges, maximum N - 1
+        *mst = new Edge[nr_vertices - 1]; // allocate data for the list of edges, maximum N - 1
 
         quickSort(edges, size); // sort the list of edges
 
         for (int i = 0; i < size; i++) { // loop through edges
-            if (*out_size == N - 1) {
-                break; // we have found an mst
+            if (*out_size == nr_vertices - 1) {
+                break; // we have found the mst
             }
 
             const int v_f = edges[i].from;
             const int v_t = edges[i].to;
 
-            Set s_f = vertices[v_f];
-            Set s_t = vertices[v_t];
+            Set* s_f = vertices[v_f];
+            Set* s_t = vertices[v_t];
 
-            if (find_set(&s_f) != find_set(&s_t)) { // if they are on separate subgraphs, merge them
-                set_union(&s_f, &s_t);
+            if (find_set(s_f, find_op) != find_set(s_t, find_op)) { // if they are on separate subgraphs, merge them
+                set_union(s_f, s_t, union_op);
 
                 (*mst)[*out_size] = edges[i]; // add edge to solution list
                 (*out_size)++;
             }
         }
 
+        for (int i = 0; i < nr_vertices; i++) {
+            delete vertices[i];
+        }
         delete[] vertices;
+    }
+
+    // this function generates a list of edges for vertices 0 - N-1
+    void generate_edges(int N, Edge** edges, int *out_size) {
+        if (out_size == nullptr || edges == nullptr) {
+            return;
+        }
+
+        #define adj(x, y) graph[N * (x) + (y)]
+        int *graph = new int[N * N];
+        memset(graph, 0, N * N * sizeof(int));
+
+        int generated_count = 0;
+        int limit_edges = 4 * N;
+
+        // 1. Backbone (Ensure Connectivity)
+        for (int i = 0; i < N - 1; i++) {
+            int w = random_number(1, 50);
+            adj(i, i + 1) = w;
+            adj(i + 1, i) = w;
+            generated_count++;
+        }
+
+        while (generated_count < limit_edges && generated_count < (N * (N - 1) / 2)) {
+            int u = random_number(0, N - 1);
+            int v = random_number(0, N - 1);
+
+            if (u == v) continue; // no loops
+            if (adj(u, v) > 0) continue; // no duplicates
+
+            int w = random_number(1, 50);
+            adj(u, v) = w;
+            adj(v, u) = w;
+            generated_count++;
+        }
+
+        *out_size = generated_count;
+        *edges = new Edge[generated_count];
+
+        int k = 0;
+        for (int i = 0; i < N; i++) {
+            for (int j = i + 1; j < N; j++) {
+                if (adj(i, j) > 0) {
+                    (*edges)[k++] = {i, j, adj(i, j)};
+                }
+            }
+        }
+
+        delete[] graph;
+        #undef adj
     }
 
     void demonstrate() {
@@ -190,62 +263,50 @@ namespace lab08
 
         delete[] mst;
 
+        Edge* edge_list = nullptr;
+        int nr_edges = 0;
+        generate_edges(10, &edge_list, &nr_edges);
+
+        printf("Generated graph edges:\n");
+        for (int i = 0; i < nr_edges; i++) {
+            printf("{%d, %d, %d}\n", edge_list[i].from, edge_list[i].to, edge_list[i].weight);
+        }
+
+        delete[] edge_list;
+
         for (auto & set : sets) {
             delete set;
         }
     }
 
-    // this function generates a list of edges for vertices 0 - N-1
-    void generateEdges(int N, Edge** edges, int *out_size) {
-        // collect into a list of edges
-        if (out_size == nullptr) {
-            fprintf(stderr, "out_size can not be nullptr!");
-            return;
-        }
-
-        if (edges == nullptr) {
-            fprintf(stderr, "edges can not be nullptr!");
-            return;
-        }
-
-        #define adj(x, y) graph[N * x + y]
-        int *graph = new int[N * N];
-        int nr_edges = 0;
-
-        memset(graph, 0, N * N * sizeof(int)); // zero the adjacency matrix
-        for (int i = 0; i < N - 1; i++) {
-            adj(i, i + 1) = adj(i + 1, i) = random_number(1, 50); // connect 0->1, 1->2 to generate a connected graph
-            nr_edges++;
-        }
-
-
-        for (int i = 0; i < N; i++) {
-            for (int j = i + 1; j < N; j++) {
-                if (adj(i, j) > 0) continue; // only single edges, no more than one edge per vertex pair
-                const int put_chance = random_number(1, 10);
-                if (put_chance >= 5) { // put an edge 50% of the time
-                    adj(i, j) = adj(j, i) = random_number(1, 50);
-                    nr_edges++;
-                }
-            }
-        }
-
-        *out_size = 0;
-        *edges = new Edge[nr_edges];
-        for (int i = 0; i < N; i++) {
-            for (int j = i + 1; j < N; j++) {
-                if (adj(i, j) > 0) {
-                    (*edges)[(*out_size)] = {i, j, adj(i, j)};
-                    (*out_size)++;
-                }
-            }
-        }
-
-        delete[] graph;
-    }
-
     void performance(Profiler &profiler) {
+        for (int repeat = 0; repeat < 5; repeat++) {
+            for (int n = 100; n <= 10000; n += 100) {
+                printf("n = %d ", n);
+                fflush(stdout);
+                int nr_edges = 0;
+                Edge* edges = nullptr;
+                generate_edges(n, &edges, &nr_edges);
+                printf("generated edges ");
+                fflush(stdout);
+                Operation make_op = profiler.createOperation("make", n);
+                Operation union_op = profiler.createOperation("union", n);
+                Operation find_op = profiler.createOperation("find", n);
 
+                Edge* mst = nullptr;
+                int nr_mst_edges = 0;
+                kruskal(n, edges, nr_edges, &mst, &nr_mst_edges, &make_op, &union_op, &find_op);
+                printf("mst done\n");
+                fflush(stdout);
+                delete[] mst;
+                delete[] edges;
+            }
+        }
+
+        profiler.divideValues("make", 5);
+        profiler.divideValues("union", 5);
+        profiler.divideValues("find", 5);
+        profiler.createGroup("Set operations", "make", "union", "find");
     }
 }
 
