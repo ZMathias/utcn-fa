@@ -264,8 +264,8 @@ namespace lab08
         edges[8] = {0, 4, 10};
 
         printf("Input Graph Edges:\n");
-        for(int i=0; i<9; i++) {
-            printf("%d-%d: %d\n", edges[i].from, edges[i].to, edges[i].weight);
+        for(auto & edge : edges) {
+            printf("%d-%d: %d\n", edge.from, edge.to, edge.weight);
         }
 
         Edge* mst = nullptr;
