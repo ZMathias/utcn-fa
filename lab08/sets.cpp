@@ -1,6 +1,18 @@
 #include "sets.h"
 
-#include <set>
+/*
+ * 1. Complexity Analysis:
+ * MAKE_SET is O(1).
+ * UNION and FIND_SET operations take nearly O(1) time on average due to
+ * Path Compression and Union by Rank heuristics.
+ * Kruskal's algorithm is dominated by sorting the edges, O(E log E).
+ *
+ * make operation grows linearly with N
+ * find operation count is significantly higher than union, as Kruskal
+ * performs 2 finds for every edge considered.
+ * due to path compression, the cost of FIND operations remains very low
+ * even as N increases.
+ */
 
 namespace lab08
 {
@@ -180,10 +192,9 @@ namespace lab08
 
         int generated_count = 0;
         int limit_edges = 4 * N;
-
-        // 1. Backbone (Ensure Connectivity)
+        // backbone connectivity edges
         for (int i = 0; i < N - 1; i++) {
-            int w = random_number(1, 50);
+            int w = random_number(1, 3600);
             adj(i, i + 1) = w;
             adj(i + 1, i) = w;
             generated_count++;
@@ -196,7 +207,7 @@ namespace lab08
             if (u == v) continue; // no loops
             if (adj(u, v) > 0) continue; // no duplicates
 
-            int w = random_number(1, 50);
+            int w = random_number(1, 3600);
             adj(u, v) = w;
             adj(v, u) = w;
             generated_count++;
@@ -252,11 +263,16 @@ namespace lab08
         edges[7] = {3, 4, 15};
         edges[8] = {0, 4, 10};
 
+        printf("Input Graph Edges:\n");
+        for(int i=0; i<9; i++) {
+            printf("%d-%d: %d\n", edges[i].from, edges[i].to, edges[i].weight);
+        }
+
         Edge* mst = nullptr;
         int size = 0;
         kruskal(5, edges, 9, &mst, &size);
 
-        putchar('\n');
+        printf("\nMST is:\n");
         for (int i = 0; i < size; i++) {
             printf("%d-%d\n", mst[i].from, mst[i].to);
         }
@@ -267,7 +283,7 @@ namespace lab08
         int nr_edges = 0;
         generate_edges(10, &edge_list, &nr_edges);
 
-        printf("Generated graph edges:\n");
+        printf("\nGenerated graph edges:\n");
         for (int i = 0; i < nr_edges; i++) {
             printf("{%d, %d, %d}\n", edge_list[i].from, edge_list[i].to, edge_list[i].weight);
         }
@@ -282,13 +298,13 @@ namespace lab08
     void performance(Profiler &profiler) {
         for (int repeat = 0; repeat < 5; repeat++) {
             for (int n = 100; n <= 10000; n += 100) {
-                printf("n = %d ", n);
-                fflush(stdout);
+                //printf("n = %d ", n);
+                //fflush(stdout);
                 int nr_edges = 0;
                 Edge* edges = nullptr;
                 generate_edges(n, &edges, &nr_edges);
-                printf("generated edges ");
-                fflush(stdout);
+                //printf("generated edges ");
+                //fflush(stdout);
                 Operation make_op = profiler.createOperation("make", n);
                 Operation union_op = profiler.createOperation("union", n);
                 Operation find_op = profiler.createOperation("find", n);
@@ -296,8 +312,8 @@ namespace lab08
                 Edge* mst = nullptr;
                 int nr_mst_edges = 0;
                 kruskal(n, edges, nr_edges, &mst, &nr_mst_edges, &make_op, &union_op, &find_op);
-                printf("mst done\n");
-                fflush(stdout);
+                //printf("mst done\n");
+                //fflush(stdout);
                 delete[] mst;
                 delete[] edges;
             }
