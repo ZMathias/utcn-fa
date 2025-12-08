@@ -41,12 +41,12 @@ typedef struct{
     Node **v;
 }Graph;
 
-int get_neighbors(const Grid *grid, Point p, Point neighb[]);
+int get_neighbors(const Grid *grid, Point p, Point neighbours[]);
 void grid_to_graph(const Grid *grid, Graph *graph);
 void free_graph(Graph *graph);
 void bfs(const Graph *graph, Node *s, Operation *op=nullptr);
 void print_bfs_tree(const Graph *graph);
-int shortest_path(Graph *graph, Node *start, Node *end, Node *path[]);
+int shortest_path(const Graph *graph, Node *start, Node *end, Node *path[]);
 void performance();
 
 #endif

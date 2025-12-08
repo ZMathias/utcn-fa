@@ -1,33 +1,39 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+/*
+ * The get_neighbours function procedurally generates the neighbours if they are inside the boundaries
+ * bfs correctly enqueues and colors nodes while traversing the graph. It is of complexity O(V + E)
+ * shortest_path runs bfs and populates the path array going backwards through the parent pointers
+ * performance uses generate edges which correctly generates a connected graph with the specified
+ * amount of vertices and edges
+ */
 
 #include <cstdlib>
 #include <string>
 #include "bfs.h"
 
+#include <climits>
 #include <cmath>
 #include <queue>
-#include <stack>
+#include <random>
 
-bool is_inside(const Grid *grid, Point p) {
+bool is_inside(const Grid *grid, const Point p) {
     const int lim_x = grid->cols;
     const int lim_y = grid->rows;
 
     return p.col >= 0 && p.col <= lim_x && p.row >= 0 && p.row <= lim_y;
 }
 
-int get_neighbors(const Grid *grid, Point p, Point neighb[]) {
+int get_neighbors(const Grid *grid, Point p, Point neighbours[]) {
     int arr_it = 0;
     for (int i = 0; i < 4; i++) {
-        int posx[] = {0, 0, -1, 1};
-        int posy[] = {1, -1, 0, 0};
+        constexpr int pos_x[] = {0, 0, -1, 1};
+        constexpr int pos_y[] = {1, -1, 0, 0};
         Point translated = p;
-        translated.col += posx[i];
-        translated.row += posy[i];
+        translated.col += pos_x[i];
+        translated.row += pos_y[i];
 
         if (is_inside(grid, translated)) {
             if (grid->mat[translated.row][translated.col] == 0) {
-                neighb[arr_it++] = translated;
+                neighbours[arr_it++] = translated;
             }
         }
     }
@@ -39,7 +45,7 @@ void grid_to_graph(const Grid *grid, Graph *graph) {
     //we need to keep the nodes in a matrix, so we can easily refer to a position in the grid
     Node *nodes[MAX_ROWS][MAX_COLS];
     int i, j;
-    Point neighb[4];
+    Point neighbours[4];
 
     //compute how many nodes we have and allocate each node
     graph->nrNodes = 0;
@@ -68,15 +74,15 @@ void grid_to_graph(const Grid *grid, Graph *graph) {
 
     //compute the adjacency list for each node
     for (i = 0; i < graph->nrNodes; ++i) {
-        graph->v[i]->adjSize = get_neighbors(grid, graph->v[i]->position, neighb);
+        graph->v[i]->adjSize = get_neighbors(grid, graph->v[i]->position, neighbours);
         if (graph->v[i]->adjSize != 0) {
             graph->v[i]->adj = static_cast<Node **>(malloc(graph->v[i]->adjSize * sizeof(Node *)));
             k = 0;
             for (j = 0; j < graph->v[i]->adjSize; ++j) {
-                if (neighb[j].row >= 0 && neighb[j].row < grid->rows &&
-                    neighb[j].col >= 0 && neighb[j].col < grid->cols &&
-                    grid->mat[neighb[j].row][neighb[j].col] == 0) {
-                    graph->v[i]->adj[k++] = nodes[neighb[j].row][neighb[j].col]; //-V522
+                if (neighbours[j].row >= 0 && neighbours[j].row < grid->rows &&
+                    neighbours[j].col >= 0 && neighbours[j].col < grid->cols &&
+                    grid->mat[neighbours[j].row][neighbours[j].col] == 0) {
+                    graph->v[i]->adj[k++] = nodes[neighbours[j].row][neighbours[j].col]; //-V522
                 }
             }
             if (k < graph->v[i]->adjSize) {
@@ -108,40 +114,41 @@ void free_graph(Graph *graph) {
 }
 
 void bfs(const Graph *graph, Node *s, Operation *op) {
-    /* TODO: implement the BFS algorithm on the graph, starting from the node s
-    * at the end of the algorithm, every node reachable from s should have the color BLACK
-    * for all the visited nodes, the minimum distance from s (dist) and the parent in the BFS tree should be set
-    * for counting the number of operations, the optional op parameter is received
-    */
-
     for (int i = 0; i < graph->nrNodes; i++) {
-        NodeT* node = graph->v[i];
+        NodeT *node = graph->v[i];
         node->parent = nullptr;
-        node->dist = INFINITY;
+        node->dist = INT_MAX;
         node->color = COLOR_WHITE;
+        if (op) op->count(4);
     } // initialize all nodes
 
-    std::queue<NodeT*> q;
+    std::queue<NodeT *> q;
     q.push(s);
     s->color = COLOR_GRAY;
     s->dist = 0;
+    if (op) op->count(3);
 
     // enqueue all neighbours of s
     while (!q.empty()) {
-        NodeT* curr = q.front();
+        NodeT *curr = q.front();
         q.pop();
 
+        if (op) op->count(2);
+
         for (int i = 0; i < curr->adjSize; i++) {
+            if (op) op->count();
             if (curr->adj[i]->color == COLOR_WHITE) {
                 curr->adj[i]->color = COLOR_GRAY; // enqueue turns nodes to grey
                 curr->adj[i]->parent = curr;
                 curr->adj[i]->dist = curr->dist + 1;
                 q.push(curr->adj[i]);
+                if (op) op->count(4);
             }
         }
 
         // after done processing turn the node black
         curr->color = COLOR_BLACK;
+        if (op) op->count();
     }
 }
 
@@ -149,10 +156,9 @@ void pretty_print_r1(int *parent, Point *repr, int size, int node, int depth) {
     if (parent == nullptr)
         return;
 
-    constexpr int spaces_per_depth = 8;
-
     for (int i = 0; i < size; i++) {
         if (parent[i] == node) {
+            constexpr int spaces_per_depth = 8;
             for (int x = 0; x < depth * spaces_per_depth; x++) {
                 putchar(' ');
             }
@@ -170,19 +176,19 @@ void print_bfs_tree(const Graph *graph) {
 
     //some of the nodes in graph->v may not have been reached by BFS
     //p and repr will contain only the reachable nodes
-    int *transf = static_cast<int *>(malloc(graph->nrNodes * sizeof(int)));
+    int *trans = static_cast<int *>(malloc(graph->nrNodes * sizeof(int)));
     for (int i = 0; i < graph->nrNodes; ++i) {
         if (graph->v[i]->color == COLOR_BLACK) {
-            transf[i] = n; //-V522
+            trans[i] = n; //-V522
             ++n;
         } else {
             //-V522
-            transf[i] = -1;
+            trans[i] = -1;
         }
     }
     if (n == 0) {
         //no BFS tree
-        free(transf);
+        free(trans);
         return;
     }
 
@@ -191,18 +197,18 @@ void print_bfs_tree(const Graph *graph) {
     repr = new Point[n];
     for (int i = 0; i < graph->nrNodes && !err; ++i) {
         if (graph->v[i]->color == COLOR_BLACK) {
-            if (transf[i] < 0 || transf[i] >= n) {
+            if (trans[i] < 0 || trans[i] >= n) {
                 err = 1;
             } else {
-                repr[transf[i]] = graph->v[i]->position;
+                repr[trans[i]] = graph->v[i]->position;
                 if (graph->v[i]->parent == nullptr) {
-                    p[transf[i]] = -1; //-V522
+                    p[trans[i]] = -1; //-V522
                 } else {
                     err = 1;
                     for (int j = 0; j < graph->nrNodes; ++j) {
                         if (graph->v[i]->parent == graph->v[j]) {
-                            if (transf[j] >= 0 && transf[j] < n) {
-                                p[transf[i]] = transf[j]; //-V595
+                            if (trans[j] >= 0 && trans[j] < n) {
+                                p[trans[i]] = trans[j]; //-V595
                                 err = 0;
                             }
                             break;
@@ -212,15 +218,11 @@ void print_bfs_tree(const Graph *graph) {
             }
         }
     }
-    free(transf);
+    free(trans);
     // NOLINTNEXTLINE
-    transf = nullptr;
+    trans = nullptr;
 
     if (!err) {
-        // TODO: pretty print the BFS tree
-        // the parent array is p (p[k] is the parent for node k or -1 if k is the root)
-        // when printing the node k, print repr[k] (it contains the row and column for that point)
-        // you can adapt the code for transforming and printing multi-way trees from the previous labs
         pretty_print_r1(p, repr, n, -1, 0);
     }
 
@@ -234,20 +236,84 @@ void print_bfs_tree(const Graph *graph) {
     delete[] repr;
 }
 
-int shortest_path(Graph *graph, Node *start, Node *end, Node *path[]) {
+int shortest_path(const Graph *graph, Node *start, Node *end, Node *path[]) {
     bfs(graph, start); // color the nodes
 
-    NodeT* tmp = end;
-    int size = end->dist - 1;
+    if (end->parent == nullptr) {
+        return -1;
+    }
+
+    NodeT *tmp = end;
     while (tmp != nullptr && tmp->parent != start) {
         tmp = tmp->parent;
-        path[size - tmp->dist] = tmp;
-        printf("i: %d\n", size - tmp->dist);
+        path[tmp->dist - 1] = tmp;
     }
-    fflush(stdout);
-    return end->dist != INFINITY ? size : -1;
+
+    return end->parent->dist;
 }
 
+int random_number(const int lo, const int hi) {
+    static std::mt19937 gen(std::random_device{}());
+    std::uniform_int_distribution<int> distrib(lo, hi);
+    return distrib(gen);
+}
+
+// this function generates a list of edges for vertices 0 - N-1
+void generate_edges(const int V, const int E, NodeT** nodes) {
+    if (nodes == nullptr) {
+        return;
+    }
+
+    const int theoretical_edges = V * (V - 1) / 2;
+    if (E > theoretical_edges) {
+        fprintf(stderr, "requested edges %d, maximum edges %d\n", E, theoretical_edges);
+        return;
+    }
+
+    if (E < V - 1) {
+        fprintf(stderr, "E < V - 1 violates the connected property of the graph\n");
+        return;
+    }
+
+    #define adj(x, y) graph[V * (x) + (y)]
+    bool *graph = new bool[V * V];
+    memset(graph, 0, V * V * sizeof(bool));
+
+    int generated_count = 0;
+    // backbone connectivity edges
+    for (int i = 0; i < V - 1; i++) {
+        adj(i, i + 1) = true;
+        adj(i + 1, i) = true;
+        generated_count++;
+    }
+
+    while (generated_count < E && generated_count < (V * (V - 1) / 2)) {
+        const int u = random_number(0, V - 1);
+        const int v = random_number(0, V - 1);
+
+        if (u == v) continue; // no loops
+        if (adj(u, v) > 0) continue; // no duplicates
+
+        adj(u, v) = true;
+        adj(v, u) = true;
+        generated_count++;
+    }
+
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; j++) {
+            if (!adj(i, j))
+                continue;
+
+            if (nodes[i]->adj == nullptr) {
+                nodes[i]->adj = (NodeT**)malloc((V - 1) * sizeof(NodeT*)); // every node can have at most V - 1 outgoing edges with no loops
+            }
+            nodes[i]->adj[nodes[i]->adjSize++] = nodes[j]; // add node pointer to its adjacency list
+        }
+    }
+
+    delete[] graph;
+    #undef adj
+}
 
 void performance() {
     int n, i;
@@ -264,8 +330,8 @@ void performance() {
             graph.v[i] = static_cast<Node *>(malloc(sizeof(Node))); //-V522
             memset(graph.v[i], 0, sizeof(Node)); //-V575
         }
-        // TODO: generate n random edges
-        // make sure the generated graph is connected
+
+        generate_edges(100, n, graph.v);
 
         bfs(&graph, graph.v[0], &op);
         free_graph(&graph);
@@ -284,6 +350,7 @@ void performance() {
         }
         // TODO: generate 4500 random edges
         // make sure the generated graph is connected
+        generate_edges(n, 4500, graph.v);
 
         bfs(&graph, graph.v[0], &op);
         free_graph(&graph);
@@ -291,3 +358,4 @@ void performance() {
 
     p.showReport();
 }
+
