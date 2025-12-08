@@ -3,9 +3,12 @@
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
-  <component name="CMakePresetLoader"><![CDATA[{
-  "useNewFormat": true
-}]]></component>
+  <component name="BackendCodeEditorMiscSettings">
+    <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
+  </component>
+  <component name="CMakePresetLoader">{
+  &quot;useNewFormat&quot;: true
+}</component>
   <component name="CMakeProjectFlavorService">
     <option name="flavorId" value="CMakePlainProjectFlavor" />
   </component>
@@ -25,6 +28,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0d85ced1-bcc1-404d-a6d6-ed189cc1a221" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../common/Profiler.h" beforeDir="false" afterPath="$PROJECT_DIR$/../common/Profiler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bfs.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/bfs.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bfs.h" beforeDir="false" afterPath="$PROJECT_DIR$/bfs.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/grid.txt" beforeDir="false" afterPath="$PROJECT_DIR$/grid.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -56,9 +64,9 @@
     <option name="minorVersion" value="2.5" />
     <option name="productBranch" value="Classic" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="36NCXYMguejjzy3iGefQkBkxg97" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -82,16 +90,11 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "CMakeSettings",
+    "settings.editor.selected.configurable": "PVS-Studio.Settings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RunManager">
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="lab09" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="lab09" TARGET_NAME="lab09" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="lab09" RUN_TARGET_NAME="lab09">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -106,6 +109,8 @@
       <option name="presentableId" value="Default" />
       <updated>1764837682252</updated>
       <workItem from="1764837683449" duration="1568000" />
+      <workItem from="1765188598675" duration="521000" />
+      <workItem from="1765189153640" duration="370000" />
     </task>
     <servers />
   </component>
