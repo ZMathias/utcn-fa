@@ -237,19 +237,23 @@ void print_bfs_tree(const Graph *graph) {
 }
 
 int shortest_path(const Graph *graph, Node *start, Node *end, Node *path[]) {
-    bfs(graph, start); // color the nodes
+    bfs(graph, start);
 
-    if (end->parent == nullptr) {
+    if (end->dist == INT_MAX) { // Check if end was reached
         return -1;
     }
 
-    NodeT *tmp = end;
-    while (tmp != nullptr && tmp->parent != start) {
-        tmp = tmp->parent;
-        path[tmp->dist - 1] = tmp;
+    int length = 0;
+    Node *curr = end;
+
+    // Trace back from End to Start
+    while (curr != nullptr) {
+        path[curr->dist] = curr; // Place node at its correct distance index
+        if (curr == start) break;
+        curr = curr->parent;
     }
 
-    return end->parent->dist;
+    return end->dist + 1; // Return number of nodes in the path
 }
 
 int random_number(const int lo, const int hi) {

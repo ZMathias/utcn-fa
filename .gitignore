@@ -41,3 +41,5 @@ lab09/.idea/editor.xml
 *.log
 /lab09/.PVS-Studio
 /lab09/.idea
+/lab09/.PVS-Studio
+lab09/.idea/workspace.xml
