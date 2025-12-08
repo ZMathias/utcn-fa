@@ -22,6 +22,25 @@ bool is_inside(const Grid *grid, const Point p) {
     return p.col >= 0 && p.col <= lim_x && p.row >= 0 && p.row <= lim_y;
 }
 
+int get_knight_moves(const Grid *grid, Point p, Point neighbours[]) {
+    int arr_it = 0;
+    for (int i = 0; i < 8; i++) {
+        constexpr int pos_x[] = {1, 2, 2, 1, -1, -2, -2, -1};
+        constexpr int pos_y[] = {2, 1, -1, -2, -2, -1, 1, 2};
+        Point translated = p;
+        translated.col += pos_x[i];
+        translated.row += pos_y[i];
+
+        if (is_inside(grid, translated)) {
+            if (grid->mat[translated.row][translated.col] == 0) {
+                neighbours[arr_it++] = translated;
+            }
+        }
+    }
+
+    return arr_it;
+}
+
 int get_neighbors(const Grid *grid, Point p, Point neighbours[]) {
     int arr_it = 0;
     for (int i = 0; i < 4; i++) {
@@ -149,6 +168,38 @@ void bfs(const Graph *graph, Node *s, Operation *op) {
         // after done processing turn the node black
         curr->color = COLOR_BLACK;
         if (op) op->count();
+    }
+}
+
+void bfs_knight(const Graph *graph) {
+    for (int i = 0; i < graph->nrNodes; i++) {
+        NodeT *node = graph->v[i];
+        node->parent = nullptr;
+        node->dist = INT_MAX;
+        node->color = COLOR_WHITE;
+    } // initialize all nodes
+
+    std::queue<NodeT *> q;
+    NodeT source = {1, 1, 0, nullptr, COLOR_GRAY, 0, nullptr};
+    q.push(&source);
+
+    // enqueue all neighbours of s
+    while (!q.empty()) {
+        NodeT *curr = q.front();
+        q.pop();
+
+
+        for (int i = 0; i < curr->adjSize; i++) {
+            if (curr->adj[i]->color == COLOR_WHITE) {
+                curr->adj[i]->color = COLOR_GRAY; // enqueue turns nodes to grey
+                curr->adj[i]->parent = curr;
+                curr->adj[i]->dist = curr->dist + 1;
+                q.push(curr->adj[i]);
+            }
+        }
+
+        // after done processing turn the node black
+        curr->color = COLOR_BLACK;
     }
 }
 
