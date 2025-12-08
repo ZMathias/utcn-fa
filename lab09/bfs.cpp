@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <queue>
+#include <stack>
 
 bool is_inside(const Grid *grid, Point p) {
     const int lim_x = grid->cols;
@@ -234,12 +235,17 @@ void print_bfs_tree(const Graph *graph) {
 }
 
 int shortest_path(Graph *graph, Node *start, Node *end, Node *path[]) {
-    // TODO: compute the shortest path between the nodes start and end in the given graph
-    // the nodes from the path, should be filled, in order, in the array path
-    // the number of nodes filled in the path array should be returned
-    // if end is not reachable from start, return -1
-    // note: the size of the array path is guaranteed to be at least 1000
-    return -1;
+    bfs(graph, start); // color the nodes
+
+    NodeT* tmp = end;
+    int size = end->dist - 1;
+    while (tmp != nullptr && tmp->parent != start) {
+        tmp = tmp->parent;
+        path[size - tmp->dist] = tmp;
+        printf("i: %d\n", size - tmp->dist);
+    }
+    fflush(stdout);
+    return end->dist != INFINITY ? size : -1;
 }
 
 

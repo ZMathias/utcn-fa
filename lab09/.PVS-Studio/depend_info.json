@@ -9,21 +9,6 @@
             "-DPVS_STUDIO",
             "-DPVS_VERSION_MAJOR=7",
             "-DPVS_VERSION_MINOR=39",
-            "/home/mathias/user/Egyetem/FA/utcn-fa/lab09/main.cpp"
-        ],
-        "dependencies": [],
-        "id": 2
-    },
-    {
-        "arguments": [
-            "/usr/bin/c++",
-            "-I/home/mathias/user/Egyetem/FA/utcn-fa/lab09/../common",
-            "-g",
-            "-std=c++23",
-            "-fdiagnostics-color=always",
-            "-DPVS_STUDIO",
-            "-DPVS_VERSION_MAJOR=7",
-            "-DPVS_VERSION_MINOR=39",
             "/home/mathias/user/Egyetem/FA/utcn-fa/lab09/bfs.cpp"
         ],
         "dependencies": [
@@ -319,5 +304,20 @@
             "/usr/include/c++/15.2.1/bits/quoted_string.h"
         ],
         "id": 1
+    },
+    {
+        "arguments": [
+            "/usr/bin/c++",
+            "-I/home/mathias/user/Egyetem/FA/utcn-fa/lab09/../common",
+            "-g",
+            "-std=c++23",
+            "-fdiagnostics-color=always",
+            "-DPVS_STUDIO",
+            "-DPVS_VERSION_MAJOR=7",
+            "-DPVS_VERSION_MINOR=39",
+            "/home/mathias/user/Egyetem/FA/utcn-fa/lab09/main.cpp"
+        ],
+        "dependencies": [],
+        "id": 2
     }
 ]
