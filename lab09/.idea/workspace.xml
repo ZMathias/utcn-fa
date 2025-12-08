@@ -28,12 +28,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0d85ced1-bcc1-404d-a6d6-ed189cc1a221" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../common/Profiler.h" beforeDir="false" afterPath="$PROJECT_DIR$/../common/Profiler.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bfs.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/bfs.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bfs.h" beforeDir="false" afterPath="$PROJECT_DIR$/bfs.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/grid.txt" beforeDir="false" afterPath="$PROJECT_DIR$/grid.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -110,7 +108,7 @@
       <updated>1764837682252</updated>
       <workItem from="1764837683449" duration="1568000" />
       <workItem from="1765188598675" duration="521000" />
-      <workItem from="1765189153640" duration="370000" />
+      <workItem from="1765189153640" duration="4429000" />
     </task>
     <servers />
   </component>
