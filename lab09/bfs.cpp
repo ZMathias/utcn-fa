@@ -64,7 +64,12 @@ void grid_to_graph(const Grid *grid, Graph *graph) {
     //we need to keep the nodes in a matrix, so we can easily refer to a position in the grid
     Node *nodes[MAX_ROWS][MAX_COLS];
     int i, j;
-    Point neighbours[4];
+
+    int num_n;
+    if (knight_eval)
+        num_n = 8;
+    else num_n = 4;
+    Point neighbours[num_n];
 
     //compute how many nodes we have and allocate each node
     graph->nrNodes = 0;
@@ -93,7 +98,12 @@ void grid_to_graph(const Grid *grid, Graph *graph) {
 
     //compute the adjacency list for each node
     for (i = 0; i < graph->nrNodes; ++i) {
-        graph->v[i]->adjSize = get_neighbors(grid, graph->v[i]->position, neighbours);
+        if (knight_eval) {
+            graph->v[i]->adjSize = get_knight_moves(grid, graph->v[i]->position, neighbours);
+        } else {
+            graph->v[i]->adjSize = get_neighbors(grid, graph->v[i]->position, neighbours);
+        }
+
         if (graph->v[i]->adjSize != 0) {
             graph->v[i]->adj = static_cast<Node **>(malloc(graph->v[i]->adjSize * sizeof(Node *)));
             k = 0;
@@ -168,38 +178,6 @@ void bfs(const Graph *graph, Node *s, Operation *op) {
         // after done processing turn the node black
         curr->color = COLOR_BLACK;
         if (op) op->count();
-    }
-}
-
-void bfs_knight(const Graph *graph) {
-    for (int i = 0; i < graph->nrNodes; i++) {
-        NodeT *node = graph->v[i];
-        node->parent = nullptr;
-        node->dist = INT_MAX;
-        node->color = COLOR_WHITE;
-    } // initialize all nodes
-
-    std::queue<NodeT *> q;
-    NodeT source = {1, 1, 0, nullptr, COLOR_GRAY, 0, nullptr};
-    q.push(&source);
-
-    // enqueue all neighbours of s
-    while (!q.empty()) {
-        NodeT *curr = q.front();
-        q.pop();
-
-
-        for (int i = 0; i < curr->adjSize; i++) {
-            if (curr->adj[i]->color == COLOR_WHITE) {
-                curr->adj[i]->color = COLOR_GRAY; // enqueue turns nodes to grey
-                curr->adj[i]->parent = curr;
-                curr->adj[i]->dist = curr->dist + 1;
-                q.push(curr->adj[i]);
-            }
-        }
-
-        // after done processing turn the node black
-        curr->color = COLOR_BLACK;
     }
 }
 

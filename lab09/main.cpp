@@ -39,7 +39,11 @@ int readGrid(Grid *grid)
     FILE *fin;
     int i, j;
 
-    fin = fopen("../grid.txt", "r");
+    if (knight_eval) {
+        fin = fopen("../knight.txt", "r");
+    } else {
+        fin = fopen("../grid.txt", "r");
+    }
 
     if (!fin) {
         fprintf(stderr, "Couldn't open grid.txt!\n");

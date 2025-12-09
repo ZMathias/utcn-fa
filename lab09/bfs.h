@@ -6,6 +6,8 @@
 
 #include "Profiler.h"
 
+constexpr bool knight_eval = false;
+
 #define MAX_ROWS 100
 #define MAX_COLS 100
 
