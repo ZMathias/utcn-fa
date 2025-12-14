@@ -37,10 +37,6 @@
 build
 bin
 x64
-lab09/.idea/editor.xml
 *.log
-/lab09/.PVS-Studio
-/lab09/.idea
-/lab09/.PVS-Studio
-lab09/.idea/workspace.xml
-/lab09/.idea
+*/.idea
+*./.PVS-Studio
