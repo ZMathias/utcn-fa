@@ -1,46 +1,27 @@
 #ifndef LAB08_DFS_H
 #define LAB08_DFS_H
 #include <list>
-#include <variant>
+#include <Profiler.h>
 #include <vector>
 
 namespace lab10
 {
-    void dfs(std::vector<std::list<int>>& adj) {
-        std::vector<bool> visited(adj.size(), false);
-        std::vector<int> par_arr;
-    }
+    enum {
+        COLOR_WHITE, COLOR_GRAY, COLOR_BLACK;
+    };
 
-    void dfs_rec(std::vector<std::list<int>>& adj, std::vector<bool>& visited, std::vector<int>& par_arr, int source, int parent) {
-        if (!visited[source]) {
-            visited[source] = true;
-            // do something if needed
-            if (source > par_arr.size()) {
-                par_arr.resize(source + 1);
-            }
-            par_arr[source] = parent;
+    struct Node {
+        char color;
+        int parent;
+        std::list<Node*> adj;
+    };
 
-            for (auto edge : adj[source]) {
-                if (!visited[edge]) {
-                    dfs_rec(adj, visited, par_arr, edge, source);
-                }
-            }
-        }
-    }
+    std::list<std::vector<int>> dfs(std::vector<std::list<int>>& adj);
+    void dfs_rec(std::vector<std::list<int>>& adj, std::vector<bool>& visited, std::vector<int>& par_arr, int source, int parent);
+    void pretty_print(const std::vector<int>& parent, int node = -1, int depth = 0);
 
-    void demonstrate() {
-        constexpr int numNodes = 6;
-        std::vector<std::list<int>> adj(numNodes);
-
-        adj[0].push_back(1);
-        adj[0].push_back(2);
-        adj[1].push_back(3);
-        adj[1].push_back(4);
-        adj[2].push_back(5);
-        adj[5].push_back(0);
-
-
-    }
+    void performance(Profiler profiler);
+    void demonstrate();
 }
 
 #endif //LAB08_DFS_H
