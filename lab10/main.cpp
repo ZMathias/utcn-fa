@@ -1,6 +1,27 @@
 #include <iostream>
+#include <Profiler.h>
+#include <commandline.h>
+#include "dfs.h"
+
+Profiler profiler("disjoint_sets");
+
+void demo(const CommandArgs& args) {
+
+    lab10::demonstrate();
+}
+
+void perf(const CommandArgs& args)
+{
+    lab10::performance(profiler);
+    profiler.showReport();
+    profiler.reset();
+}
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
+    const std::vector<CommandSpec> commands =
+    {
+        {"demo", demo, "Run demo, optional argument for size"},
+        {"perf", perf, "Generate charts"}
+    };
+    return runCommandLoop(commands);
 }

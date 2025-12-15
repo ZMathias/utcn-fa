@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.1)
-project (lab08)
+project (lab10)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,6 +14,8 @@ file(GLOB HEADERS
         ${COMMON_DIR}/*.h
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS}
+        dfs.cpp
+        dfs.h)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${COMMON_DIR})
