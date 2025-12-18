@@ -77,14 +77,20 @@ namespace lab10
                 int time = 0;
                 topo.emplace_back(-100); // placeholder for list to not be empty
                 dfs_rec(g, i, c++, time, topo, op);
-                if (!topo.empty() && topo.front() != -1) {
-                    topo.pop_back();
-                    std::println("Topological sort of component {}: {}", c - 1, topo);
-                } else {
-                    std::println("Topological sort not possible because of cycles in the graph!");
-                }
-                topo.clear();
+
+                // topo before
+
+                //topo.clear();
             }
+        }
+
+        if (!topo.empty() && topo.front() != -1) {
+            for (int i = 0; i < c; ++i) {
+                topo.pop_back();
+            }
+            std::println("Topological sort: {}", topo);
+        } else {
+            std::println("Topological sort not possible because of cycles in the graph!");
         }
 
         return c;
@@ -229,7 +235,7 @@ namespace lab10
         // demo 1.3.1 and 1.3.2
         // comment g[5].adj for 1.3.2
         constexpr int numNodes = 11;
-        std::vector<Node> g(numNodes, {COLOR_WHITE, -1, 0, -1, std::list<int>{}});
+        Graph g(numNodes, {COLOR_WHITE, -1, 0, -1, std::list<int>{}});
         g[0].adj = {1, 2, 7};
         g[1].adj = {3};
         g[2].adj = {4};
@@ -237,7 +243,16 @@ namespace lab10
         g[4].adj = {3, 6, 7};
         g[8].adj = {9};
         g[9].adj = {10};
-        //g[5].adj = {1};
+        g[5].adj = {1};
+
+        constexpr int numNodesg1 = 6;
+        Graph g1(numNodesg1, {COLOR_WHITE, -1, 0, -1, std::list<int>{}});
+        g1[0].adj = {};
+        g1[1].adj = {};
+        g1[2].adj = {3};
+        g1[3].adj = {1};
+        g1[4].adj = {0, 1};
+        g1[5].adj = {0 ,2};
 
         std::println("Graph before DFS:");
         print_graph(g);
@@ -245,7 +260,7 @@ namespace lab10
         const int num_c = dfs(g);
 
         for (int i = 0; i < num_c; ++i) {
-            std::println("\nTree of component {}:", i);
+            std::println("\nTree of dfs from source {}:", i);
             pretty_print(g, i);
         }
 
@@ -267,8 +282,20 @@ namespace lab10
         t[6].adj = {7};
         t[7].adj = {6};
 
+        Graph t1(8, {COLOR_WHITE, -1, 0, -1, std::list<int>{}});
+        t1[0].adj = {1};
+        t1[1].adj = {2, 3};
+        t1[2].adj = {0};
+        t1[3].adj = {4};
+        t1[4].adj = {3, 5};
+        t1[5].adj = {6};
+        t1[6].adj = {7};
+
+
         std::println("\nGraph before Tarjan:");
         print_graph(t);
+
+        std::println("\nTarjan:");
 
         tarjan(t);
     }
